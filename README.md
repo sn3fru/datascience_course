@@ -1,15 +1,14 @@
-# Curso de Data Science em Português
+# Data Science em Português
 
 ![neil](https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif)
 
-Canais de comunicação:
 
-**Slack**: https://join.slack.com/t/ds-dh-brasil/shared_invite/enQtNDAzOTUyODk0MTYyLTc0MWVjMDRkN2NhMjUxYzc4ODViYjBjYmVkNzQ1MjA0NmY3ODUzYjBiMDA5ZDg0M2NmMWQ2MzdjNGI0NTU2YWQ
+- [Slack Data Science Brasil](https://join.slack.com/t/ds-dh-brasil/shared_invite/enQtNDAzOTUyODk0MTYyLTc0MWVjMDRkN2NhMjUxYzc4ODViYjBjYmVkNzQ1MjA0NmY3ODUzYjBiMDA5ZDg0M2NmMWQ2MzdjNGI0NTU2YWQ)
+
+- [Conteúdo programático do curso](https://realtimeboard.com/app/board/o9J_kyGju10=/)
 
 
-
-
-## Sumário
+## Introdução a Data Science por [datascience-pizza](https://github.com/leportella/datascience-pizza)
 
 <!-- toc -->
   * [Recomendações](#recomendacoes)
@@ -48,10 +47,13 @@ Canais de comunicação:
       * [Visualização de dados](https://github.com/leportella/datascience-pizza/blob/master/topicos/visualizacao-de-dados.md)
 
 --------------------------------------------------
-<h2 id="recomendacoes">Recomendações</h2>
+<h1 id="recomendacoes">Recomendações</h1>
 
 ![](https://media.giphy.com/media/Lq3ueCSWjnQPu/giphy.gif)
 
+
+
+<h2 id="cursos">Cursos</h2>
 
 <h3 id="iniciante">Iniciante</h3>
 
@@ -70,7 +72,26 @@ Canais de comunicação:
   - [Visualização de Dados](https://github.com/leportella/datascience-pizza/blob/master/topicos/visualizacao-de-dados.md)
   - [Processamento de Linguagem Natural](https://github.com/leportella/datascience-pizza/blob/master/topicos/processamento-de-linguagem-natural.md)
 
-<h3 id="grandesprojetos">Grandes projetos (big data)</h3>
+<h2 id="livros">Livros</h2>
+
+<h3 id="code">Code</h3>
+
+  - python
+
+<h3 id="code">Math/Stat</h3>
+
+  - Uma Senhora toma Chá
+  - O Sinal e o Ruido
+  - 
+
+
+<h3 id="code">Machine Learning</h3>
+
+
+<h3 id="code">Deep Learning</h3>
+
+
+<h2 id="grandesprojetos">Grandes projetos (big data)</h2>
 
   - NoSQL
   - Scala
@@ -97,7 +118,7 @@ Ver [este link](https://github.com/leportella/datascience-pizza/blob/master/topi
 
 
 --------------------------------------------------
-<h2 id="datasets">Datasets</h2>
+<h2 id="datasets">Grandes Datasets da área</h2>
 
  - [Datasets for Machine Learning](https://docs.google.com/spreadsheets/d/1AQvZ7-Kg0lSZtG1wlgbIsrm90HaTZrJGQMz-uKRRlFw/edit#gid=0)
  - [Datasets for Data Mining and Data Science](http://www.kdnuggets.com/datasets/index.html)
