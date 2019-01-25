@@ -1,0 +1,17 @@
+Flask==0.12.2
+
+Flask-Cors==3.0.3
+
+Flask-Jsonpify==1.5.0
+
+Flask-RESTful==0.3.6
+SQLAlchemy==1.2.1
+
+jsonschema==2.6.0
+
+numpy==1.14.2
+
+pandas==0.22.0
+
+pickleshare==0.7.4
+scikit-learn==0.19.1
