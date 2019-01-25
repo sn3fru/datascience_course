@@ -1,4 +1,4 @@
-# Data Science em Português
+# Data Science
 
 ![neil](https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif)
 
