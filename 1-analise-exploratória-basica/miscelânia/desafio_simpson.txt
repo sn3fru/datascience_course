@@ -1,0 +1,27 @@
+Considere o seguinte cenário: Você foi contratado para analisar dois tratamentos para pedras nos rins
+ em termos de eficácia, vamos nomeá-los “tratamento A” e “tratamento B”. Analisando 350 casos aleatórios
+ para cada tratamentos, temos o seguinte:
+
+Tratamento A: Casos bem sucedidos: 78% (273/350)	
+Tratamento B : Casos bem sucedidos: 83% (289/350)
+
+Baseado nestes dados podemos concluir que o tratamento B é melhor que o tratamento A? 
+Nossa intuição diz que sim, mas digamos que você está sendo cuidadoso e decidiu pesquisar
+se o tratamento B é melhor tanto para casos graves (pedras grandes) quanto para casos menos graves
+(pedras pequenas), dividindo os casos nestas categorias encontramos:
+
+
+Tratamento A
+Pedras pequenas,  	Casos bem sucedidos: 93% (81/87) 
+Pedras grandes, 	Casos bem sucedidos: 73% (192/263)	 
+Total,    	        Casos bem sucedidos: 78% (273/350)	
+
+
+Tratamento B
+Pedras pequenas,    Casos bem sucedidos: 87% (234/270)
+Pedras grandes,     Casos bem sucedidos:69% (55/80)
+Total,              Casos bem sucedidos: 83% (289/350)
+
+
+Dica: Use a ideia do paradoxo de simpson.
+Problema: Explique qual dos dois tratamentos é melhor e porque.

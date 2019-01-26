@@ -1,0 +1,20 @@
+Correlaçãoo não implica causalidade. No entanto, frequentemente jornais e (as vezes, periódicos)
+parecem confundir este conceito. Desmistifique as seguintes associações:
+
+Caso I: “Di Tella & Schargrodsky (2004) citam que 18 de 22 artigos publicados na
+literatura de Economia do Crime encontraram um efeito positivo da presença da
+polícia sobre o crime. Logo, há fortes evidências suportando a tese de que policiamento 
+aumenta a criminalidade.”
+
+Caso II: “Moore (1993) constatou que a quantidade vendida de sorvete está fortemente 
+associada com o número de mortes por afogamentos. Portanto, na dúvida,
+convém substituir o sorvete por uma raspadinha.”
+
+Caso III: Em 2012, artigo publicado na New England Journal of Medicine encontrou
+alta correlação entre a quantidade per capita consumida de chocolate e o número de
+laureados pelo Prêmio Nobel usando dados de 23 países. Com objetivo de divulgar
+este importante avanço científico, jornais publicaram as seguintes manchetes:
+
+Forbes: “Chocolate Makes Us Smarter”
+Time: “Secret to Winning a Nobel Prize? Eat More Chocolate”
+Huffington Post: “Why Chocolate Makes You Smarter: It’s Proven!”
