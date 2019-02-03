@@ -1,3 +1,6 @@
+# osx files#
+.DS_Store
+
 # checkpoints #
 *.ipynb_checkpoints
 
