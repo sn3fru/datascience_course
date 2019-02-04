@@ -1,4 +1,4 @@
-,id,idade,sexo,anos_estudo,cor/raca,salario,estado_civil,regiao
+seq,id,idade,sexo,anos_estudo,cor/raca,salario,estado_civil,regiao
 0,11001901101.0,53,homem,5.0,Parda,63600.0,1.0,norte
 1,11001901102.0,49,mulher,8.0,Amarela,,1.0,norte
 2,11001901103.0,22,mulher,11.0,Indigena,4352.400390625,0.0,nordeste
