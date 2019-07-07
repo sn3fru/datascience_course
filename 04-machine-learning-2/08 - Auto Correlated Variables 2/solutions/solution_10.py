@@ -1,0 +1,1 @@
+m.plot_components(forecast)

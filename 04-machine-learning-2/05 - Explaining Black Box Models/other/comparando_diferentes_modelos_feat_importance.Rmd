@@ -1,0 +1,112 @@
+---
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.1'
+      jupytext_version: 1.1.2
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
+---
+
+# Prática guiada: Importância dos recursos em modelos Ensemble
+
+```{python}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+# %matplotlib inline
+from sklearn.preprocessing import LabelEncoder
+from sklearn.tree import DecisionTreeClassifier
+
+
+df = pd.read_csv('cars.csv')
+
+le = LabelEncoder()
+y = le.fit_transform(df['acceptability'])
+X = pd.get_dummies(df.drop('acceptability', axis=1))
+```
+
+```{python}
+from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
+
+rf = RandomForestClassifier(class_weight='balanced', n_jobs=-1)
+
+rf.fit(X, y)
+```
+
+A floresta aleatória expõe a importância dos recursos e a calcula como a média da importância dos recursos das árvores de base. Vamos verificar isso.
+
+```{python}
+importâncias = rf.feature_importances_
+print (all(importâncias == np.mean([tree.feature_importances_ for tree in rf.estimators_], axis=0)))
+```
+
+Preencher os espaços no código:
+
+```{python}
+# Calcular o desvio padrão da importância dos recursos executando um loop nas árvores na floresta aleatória
+std = np.std([tree.feature_importances_ for tree in rf.estimators_], axis=0)
+```
+
+```{python}
+índices = np.argsort(importâncias)[::-1]
+nomes_features = X.columns
+
+# Representar graficamente a importância dos recursos na floresta aleatória
+plt.figure()
+plt.title("importância dos recursos em RandomForest")
+plt.bar(range(X.shape[1]), importâncias[índices],
+       color="r", yerr=std[índices], align="center")
+plt.xticks(range(X.shape[1]), nomes_features[índices], rotation=90)
+plt.xlim([-1, X.shape[1]])
+plt.show()
+```
+
+Agora repetir o processo para calcular e representar graficamente a importância dos recursos em ExtraTrees
+
+```{python}
+et = ExtraTreesClassifier(class_weight='balanced', n_jobs=-1)
+
+et.fit(X, y)
+importâncias = et.feature_importances_
+std = np.std([tree.feature_importances_ for tree in et.estimators_], axis=0)
+
+
+índices = np.argsort(importâncias)[::-1]
+nomes_features = X.columns
+
+# Representar a importância dos recursos
+plt.figure()
+plt.title("importância dos recursos em ExtraTrees")
+plt.bar(range(X.shape[1]), importâncias[índices],
+       color="r", yerr=std[índices], align="center")
+plt.xticks(range(X.shape[1]), nomes_features[índices], rotation=90)
+plt.xlim([-1, X.shape[1]])
+plt.show()
+```
+
+Por fim, vamos comparar os 3 modelos
+
+```{python}
+dt2 = DecisionTreeClassifier()
+dt2.fit(X, y)
+importâncias=pd.DataFrame({'imp Árvore Decisão':dt2.feature_importances_,'imp Random Forest':rf.feature_importances_,'imp Extra Trees':et.feature_importances_}).sort_values(['imp Random Forest'], ascending=False)
+importâncias.plot(kind='bar')
+importâncias.head()
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```

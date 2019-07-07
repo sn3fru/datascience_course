@@ -1,0 +1,603 @@
+---
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.1'
+      jupytext_version: 1.1.3
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
+---
+
+<!-- #region -->
+# Census income classification with XGBoost
+
+
+
+# Abrindo a caixa preta dos algoritmos de ML
+
+
+### Motivação
+
+Vimos que existem algoritmos de alta interpretabilidade como regressões lineares e arvores de decisão simples. Mas nem sempre (quase nunca) esses algoritmos simples são os que retornam os melhores resultados preditivos (os menores valores na nossa curva de custo). E ficamos nesse impasse, usar algoritmos simples para conseguir explicar como ele chegou nos resultados (e ter mais confiança da área não técnica) ou usar algoritmos super poderosos que não temos a minima ideia de como ele chegou em um resultado qualquer?
+
+
+Uma saída para isso é usar as duas abordagens. Usa-se um algoritmo simples para sabermos o que está acontecendo e um mais poderoso que é uma caixa-preta para fazer previsões.
+
+
+Outra saída é tentarmos abrir a caixa preta e entender o que se passa lá.
+
+Vamos usar um dataset com caracteristicas de vinhos para treinarmos esses conceitos.
+
+
+#### O problema
+
+Nesse exemplo
+
+Sabemos fazer as modelagens estatisticas, para entender quanto cada variável impacta no nosso output, entendendo como são suas correlações parciais. Além disso, podemos entender como as variáveis endógenas influenciam umas as outras, e como essas interações influenciam-se.
+
+<img src='https://christophm.github.io/interpretable-ml-book/images/big-picture.png'>
+
+
+Mas como ter esses mesmos insights em modelos de machine learning "black-box" como ensambles, redes neurais e outros? Na aula de hoje vamos construir a intuição e dar algumas possibilidades.
+
+
+Usar **modelos lineares** resolve o problema da interpretabilidade. Mas temos pelo 4 grandes problemas.
+1) Modelos lineares esperam outputs gaussianos. Solução: Usar modelos generalizados (GLM);
+
+<img src='./img/1-nao-gaussiano.png'> 
+
+2) Modelos lineares não "entendem" a interação entre as variáveis. Solução: Passar as interações explicitamente;
+
+<img src='./img/2-interacao.png'> 
+
+<img src='https://christophm.github.io/interpretable-ml-book/images/interaction-plot-1.png'>
+
+3) Modelos lineares não entendem comportamentos não lineares. Solução: Modelagem estatistica;
+
+<img src='./img/3-nao-linear.png'>
+<img src='https://christophm.github.io/interpretable-ml-book/images/nonlinear-effects-1.png'>
+
+4) Modelos lineares são dificieis de modelar para chegar no mesmo nivel de um não linear. Solução: Estudar e praticar bastante.
+
+<img src='https://canaldoensino.com.br/blog/wp-content/uploads/2015/03/descansar-estudo.jpg'>
+
+#### Objetivo e Dados
+
+Em nosso exemplo usaremos dados reais de cidadãos americanos para prever qual a probabilidade deles ganharem mais ou menos que US$ 50mil.
+
+Então nossas variáveis explicativas são:
+
+    1- Age
+    2- Workclass
+    3- Education-Num
+    4- Marital Status
+    5- Occupation
+    6- Relationship
+    7- Race
+    8- Sex
+    9- Capital Gain
+    10- Capital Loss
+    11- Hours per week
+    12- Country
+
+e nosso target:
+Individuo ganhou mais de 50mil por ano (booleano)
+
+#### Outros Exemplos
+
+- MMNIST: https://github.com/slundberg/shap/blob/master/notebooks/deep_explainer/Front%20Page%20DeepExplainer%20MNIST%20Example.ipynb
+
+- DNA: https://github.com/slundberg/shap/blob/master/notebooks/deep_explainer/DeepExplainer%20Genomics%20Example.ipynb
+
+- LSTM e Análise de Sentimentos: https://github.com/slundberg/shap/blob/master/notebooks/deep_explainer/Keras%20LSTM%20for%20IMDB%20Sentiment%20Classification.ipynb
+
+
+#### Bibliografia
+- https://christophm.github.io/interpretable-ml-book/
+- Shapley, Lloyd S. “A value for n-person games.” Contributions to the Theory of Games 2.28 (1953): 307-317.
+
+
+Wikipedia: "... Desde o trabalho de John von Neumann e Oskar Morgenstern na década de 1940, Lloyd Shapley tem sido considerado a própria personificação da teoria dos jogos. Juntamente com Alvin Roth, foi laureado com o Prémio de Ciências Económicas em Memória de Alfred Nobel de 2012. ..."
+<!-- #endregion -->
+
+```{python}
+# !pip install pydot
+```
+
+```{python}
+# # !pip install xgboost shap pydotplus
+```
+
+```{python}
+import xgboost
+import shap
+import numpy as np
+import matplotlib.pylab as plz
+import seaborn as sns
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+import sys
+import warnings
+import pydotplus
+from IPython.display import Image
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
+from sklearn.tree import DecisionTreeClassifier, export_graphviz
+from sklearn import metrics
+from io import StringIO
+
+
+if not sys.warnoptions:
+    warnings.simplefilter("ignore")
+    
+    
+# %matplotlib inline
+# print the JS visualization code to the notebook
+shap.initjs()
+```
+
+## Load dataset
+
+```{python}
+X,y = shap.datasets.adult()
+X_display,y_display = shap.datasets.adult(display=True)
+
+# create a train/test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=7)
+d_train = xgboost.DMatrix(X_train, label=y_train)
+d_test = xgboost.DMatrix(X_test, label=y_test)
+```
+
+```{python}
+X.head()
+```
+
+```{python}
+X.describe()
+```
+
+```{python}
+X.corr().round(2)
+```
+
+```{python}
+df = X.copy(deep=True)
+
+df['target'] = y
+```
+
+```{python}
+plt.subplots(figsize=(12,9))
+ax = plt.axes()
+ax.set_title("Correlation Heatmap (Reds)")
+corr = df.corr()
+sns.heatmap(corr, 
+            xticklabels=corr.columns.values,
+            yticklabels=corr.columns.values,
+           annot=True)
+
+plt.show()
+```
+
+```{python}
+df.shape
+```
+
+```{python}
+sns.pairplot(df.sample(50), hue='target')
+```
+
+## Usando modelos lineares para entender o impacto das features
+
+```{python}
+df.head()
+```
+
+```{python}
+df.columns = df.columns.str.replace(' ', '')
+df.columns = df.columns.str.replace('-', '')
+```
+
+```{python}
+df['target'] = df['target'].astype(int)
+```
+
+```{python}
+function = '''
+target ~ Age
++ Workclass 
++ EducationNum 
++ MaritalStatus
++ C(Occupation)
++ C(Relationship) 
++ C(Race)
++ C(Sex)
++ CapitalGain
++ CapitalLoss 
++ Hoursperweek
++ C(Country)'''
+
+results = smf.ols(function, data=df).fit()
+print(results.summary())
+```
+
+<!-- #region -->
+### Parenteses para explicar simplificadamente como a arvore de decisão cria suas fronteiras de decisão com o famoso dataset IRIS
+
+
+Note que para "profundidades" maiores que 3, o algoritmo passa a conseguir (se for necessário) interagir as variáveis.
+<!-- #endregion -->
+
+```{python}
+from io import StringIO
+import numpy as np
+import matplotlib.pyplot as plt
+import pydot
+from IPython.display import Image
+from sklearn import tree
+from sklearn.datasets import load_iris
+from sklearn.tree import DecisionTreeClassifier
+# %matplotlib inline
+ 
+# Parameters
+n_classes = 3
+plot_colors = "bry"
+plot_step = 0.02
+plt.rcParams["figure.figsize"] = [12, 8]
+ 
+# Load data
+iris = load_iris()
+
+def runExampleIris():
+    for pairidx, pair in enumerate([[0, 1], [0, 2], [0, 3],
+                                    [1, 2], [1, 3], [2, 3]]):
+
+        # We only take the two corresponding features
+        X = iris.data[:, pair]
+        y = iris.target
+
+        # Shuffle
+        idx = np.arange(X.shape[0])
+        np.random.seed(13)
+        np.random.shuffle(idx)
+        X = X[idx]
+        y = y[idx]
+
+        # Standardize
+        mean = X.mean(axis=0)
+        std = X.std(axis=0)
+        X = (X - mean) / std
+
+        # Train
+        clf = DecisionTreeClassifier().fit(X, y)
+
+        # Plot the decision boundary
+        plt.subplot(2, 3, pairidx + 1)
+
+        x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+        y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+        xx, yy = np.meshgrid(np.arange(x_min, x_max, plot_step),
+                             np.arange(y_min, y_max, plot_step))
+
+        Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
+        Z = Z.reshape(xx.shape)
+        cs = plt.pcolormesh(xx, yy, Z, cmap=plt.cm.Paired)
+
+        plt.xlabel(iris.feature_names[pair[0]])
+        plt.ylabel(iris.feature_names[pair[1]])
+        plt.axis()
+
+        # Plot the training points
+        for i, color in zip(range(n_classes), plot_colors):
+            idx = np.where(y == i)
+            plt.scatter(X[idx, 0], X[idx, 1], c=color,
+                        label=iris.target_names[i],
+                        cmap=plt.cm.Paired)
+        plt.axis()
+
+    plt.show()
+    
+    
+runExampleIris()
+```
+
+## Usando modelos de arvore de decisão para entender o impacto e a relação entre as variáveis do dataset de renda.
+
+```{python}
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+
+dtr = DecisionTreeClassifier(max_depth=3)
+dtr.fit(X_train,y_train)
+yhat = dtr.predict(X_test)
+yhat_proba = 1-dtr.predict_proba(X_test)[:,:1]
+yhat_proba_train = 1-dtr.predict_proba(X_train)[:,:1]
+
+precision = metrics.precision_score(y_test,yhat)
+recall = metrics.recall_score(y_test,yhat)
+auc = metrics.roc_auc_score(y_test, yhat_proba)
+
+print(f'Precisao: {round(precision,4)}, Recall:{round(recall,4)}, AUC:{round(auc,4)}')
+```
+
+### Plotando as métricas:
+
+- Para entender o porquê e como utilizar ROC e AUC: https://lukeoakdenrayner.wordpress.com/2018/01/07/the-philosophical-argument-for-using-roc-curves/
+
+```{python}
+from sklearn.metrics import confusion_matrix
+import itertools
+
+def plot_confusion_matrix(cm, classes,
+                          normalize=False,
+                          title='Confusion matrix',
+                          cmap=plt.cm.Oranges):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be applied by setting `normalize=True`.
+    Source: http://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html
+    """
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        print("Normalized confusion matrix")
+    else:
+        print('Confusion matrix, without normalization')
+
+    print(cm)
+
+    # Plot the confusion matrix
+    plt.figure(figsize = (10, 10))
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title, size = 24)
+    plt.colorbar(aspect=4)
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45, size = 14)
+    plt.yticks(tick_marks, classes, size = 14)
+
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    
+    # Labeling the plot
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt), fontsize = 20,
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+        
+    plt.grid(None)
+    plt.tight_layout()
+    plt.ylabel('True label', size = 18)
+    plt.xlabel('Predicted label', size = 18)
+
+# Confusion matrix
+cm = confusion_matrix(y_test, yhat)
+
+plot_confusion_matrix(cm, classes = ['<50k', '>50k'],
+                      title = 'Confusion Matrix')
+
+plt.savefig('cm.png')
+```
+
+```{python}
+# Calculate false positive rates and true positive rates
+model_fpr, model_tpr, _ = metrics.roc_curve(y_test, yhat_proba)
+plt.figure(figsize = (8, 6))
+plt.rcParams['font.size'] = 16
+# Plot both curves
+plt.plot(model_fpr, model_tpr, 'r', label = 'model')
+plt.legend();
+plt.xlabel('False Positive Rate'); 
+plt.ylabel('True Positive Rate'); plt.title('ROC Curves');
+print(f'AUC:{round(auc,4)}')
+plt.show();
+```
+
+```{python}
+### E por fim a própria arvore de decisão gerada
+```
+
+```{python}
+dot_data = StringIO()
+export_graphviz(dtr,
+                out_file=dot_data,
+                filled=True,
+                rounded=True,
+                special_characters=True,
+                feature_names=list(X))
+graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
+Image(graph.create_png())
+```
+
+## Enquanto a arvore é pouco profunda, podemos entender, mas e quando a arvore é profunda??
+
+```{python}
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+
+dtr = DecisionTreeClassifier(max_depth=8)
+dtr.fit(X_train,y_train)
+yhat = dtr.predict(X_test)
+yhat_proba = 1-dtr.predict_proba(X_test)[:,:1]
+yhat_proba_train = 1-dtr.predict_proba(X_train)[:,:1]
+
+precision = metrics.precision_score(y_test,yhat)
+recall = metrics.recall_score(y_test,yhat)
+auc = metrics.roc_auc_score(y_test, yhat_proba)
+
+print(f'Precisao: {round(precision,4)}, Recall:{round(recall,4)}, AUC:{round(auc,4)}')
+
+dot_data = StringIO()
+export_graphviz(dtr,
+                out_file=dot_data,
+                filled=True,
+                rounded=True,
+                special_characters=True,
+                feature_names=list(X))
+graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
+Image(graph.create_png())
+```
+
+<!-- #region -->
+### Usando Algoritmo de BlackBox
+
+Neste caso vamos usar um xgboost como algoritmo de black-box ...
+
+Leia mais sobre o xgboost nesses links:
+
+- https://www.analyticsvidhya.com/blog/2018/09/an-end-to-end-guide-to-understand-the-math-behind-xgboost/
+- https://machinelearningmastery.com/gentle-introduction-xgboost-applied-machine-learning/
+- https://towardsdatascience.com/exploring-xgboost-4baf9ace0cf6
+
+
+### Além disso vamos fazer o tunning dos hyperparametros utilizando RandomizedSearch ao invés do simples GridSearch
+<!-- #endregion -->
+
+```{python}
+# # Create XGB Classifier object
+# xgb_clf = xgboost.XGBClassifier(verbosity = True, eval_metric = ["merror", "map", "auc"], objective = "binary:logistic")
+
+# # Altere os parametros para tree_method = "gpu_exact" e predictor = "gpu_predictor" para rodar o modelo na GPU (precisa instalar CUDA)
+
+# # Create parameter grid
+# parameters = {"learning_rate": [0.1, 0.01, 0.001],
+#                "gamma" : [0.01, 0.1, 0.3, 0.5, 1, 1.5, 2],
+#                "max_depth": [2, 4, 7, 10],
+#                "colsample_bytree": [0.3, 0.6, 0.8, 1.0],
+#                "subsample": [0.2, 0.4, 0.5, 0.6, 0.7],
+#                "reg_alpha": [0, 0.5, 1],
+#                "reg_lambda": [1, 1.5, 2, 3, 4.5],
+#                "min_child_weight": [1, 3, 5, 7],
+#                "n_estimators": [100, 250, 500, 1000],
+#                "base_score": np.mean(y_train)}
+
+# # Create RandomizedSearchCV Object
+# xgb_rscv = RandomizedSearchCV(xgb_clf, param_distributions = parameters, scoring = "f1_micro",
+#                              cv = 3, verbose = 3, random_state = 42)
+
+# # Fit the model
+# model_xgboost = xgb_rscv.fit(X_train, target_train)
+```
+
+```{python}
+params = {
+    "eta": 0.01,
+    "objective": "binary:logistic",
+    "subsample": 0.5,
+    "base_score": np.mean(y_train),
+    "eval_metric": "logloss"
+}
+```
+
+```{python}
+model = xgboost.train(params, d_train, 5000, evals = [(d_test, "test")], verbose_eval=100, early_stopping_rounds=20)
+```
+
+## Classic feature attributions
+
+Aqui nós experimentamos os cálculos de importância do recurso global que vêm com o XGBoost. Note que todos eles se contradizem, o que motiva o uso de valores SHAP, uma vez que eles vêm com consistência gaurentees (o que significa que eles vão ordenar os recursos corretamente).
+
+* "weight" é o número de vezes que um recurso aparece em uma árvore
+* "gain" é o ganho médio de divisões que usam o recurso
+* "cover" é a cobertura média de divisões que usam o recurso em que a cobertura é definida como o número de amostras afetadas pelo desdobramento
+
+```{python}
+xgboost.plot_importance(model)
+plt.title("xgboost.plot_importance(model)")
+plt.show()
+```
+
+```{python}
+xgboost.plot_importance(model, importance_type="cover")
+plt.title('xgboost.plot_importance(model, importance_type="cover")')
+plt.show()
+```
+
+```{python}
+xgboost.plot_importance(model, importance_type="gain")
+plt.title('xgboost.plot_importance(model, importance_type="gain")')
+plt.show()
+```
+
+## Explain predictions
+
+Aqui usamos a implementação Tree SHAP integrada no XGBoost para explicar o conjunto de dados inteiro (32561 amostras).
+
+```{python}
+# this takes a minute or two since we are explaining over 30 thousand samples in a model with over a thousand trees
+explainer = shap.TreeExplainer(model)
+shap_values = explainer.shap_values(X)
+```
+
+### Visualize a single prediction
+
+Observe que usamos o quadro de dados "valores de exibição" para obter strings interessantes em vez de códigos de categoria.
+
+```{python}
+shap.force_plot(explainer.expected_value, shap_values[0,:], X_display.iloc[0,:])
+```
+
+### Visualize many predictions
+
+Para manter o navegador feliz, visualizamos apenas 1.000 pessoas.
+
+```{python}
+shap.force_plot(explainer.expected_value, shap_values[:1000,:], X_display.iloc[:1000,:])
+```
+
+## Bar chart of mean importance
+
+This takes the average of the SHAP value magnitudes across the dataset and plots it as a simple bar chart.
+
+```{python}
+shap.summary_plot(shap_values, X_display, plot_type="bar")
+```
+
+## SHAP Summary Plot
+
+Em vez de usar um gráfico de barras de importância de recurso típico, usamos um gráfico de dispersão de densidade de valores SHAP para cada recurso para identificar quanto impacto cada recurso tem na saída do modelo para indivíduos no conjunto de dados de validação. Os recursos são classificados pela soma das magnitudes do valor SHAP em todas as amostras. É interessante notar que o recurso de relacionamento tem mais impacto total sobre o modelo do que o ganho captural, mas para aquelas amostras onde o ganho de capital é importante ele tem mais impacto que a idade. Em outras palavras, o ganho de capital afeta algumas previsões em grande quantidade, enquanto a idade afeta todas as previsões em uma quantidade menor. Observe que, quando os pontos de dispersão não se encaixam em uma linha, eles se acumulam para mostrar a densidade e a cor de cada ponto representa o valor do recurso desse indivíduo.
+
+```{python}
+shap.summary_plot(shap_values, X)
+```
+
+## SHAP Dependence Plots
+
+Os gráficos de dependência SHAP mostram o efeito de um único recurso em todo o conjunto de dados. Eles plotam o valor de um recurso versus o valor SHAP desse recurso em várias amostras. Os gráficos de dependência SHAP são semelhantes aos gráficos de dependência parcial, mas são responsáveis ​​pelos efeitos de interação presentes nos recursos e são definidos apenas nas regiões do espaço de entrada suportado pelos dados. A dispersão vertical de valores de SHAP em um único valor de recurso é impulsionada por efeitos de interação, e outro recurso é escolhido para colorir para destacar possíveis interações.
+
+```{python}
+for name in X_train.columns:
+    shap.dependence_plot(name, shap_values, X, display_features=X_display)
+```
+
+<!-- #region -->
+### Treine um modelo com apenas duas folhas por árvore e, portanto, sem termos de interação entre os recursos
+
+
+Forçar o modelo a não ter termos de interação significa que o efeito de um recurso no resultado não depende do valor de qualquer outro recurso. Isso é refletido nos gráficos de dependência SHAP abaixo, como nenhum spread vertical. Um spread vertical reflete que um único valor de um recurso pode ter diferentes efeitos no resultado do modelo, dependendo do contexto dos outros recursos presentes para um indivíduo. No entanto, para modelos sem termos de interação, um recurso sempre tem o mesmo impacto, independentemente de quais outros atributos um indivíduo possa ter. Um dos benefícios dos gráficos de dependência SHAP em relação aos gráficos de dependência parcial tradicionais é essa capacidade de distinguir entre modelos com e sem termos de interação. Em outras palavras, os gráficos de dependência SHAP dão uma ideia da magnitude dos termos de interação através da variância vertical do gráfico de dispersão em um determinado valor de recurso.
+<!-- #endregion -->
+
+```{python}
+# train final model on the full data set
+params = {
+    "eta": 0.05,
+    "max_depth": 1,
+    "objective": "binary:logistic",
+    "subsample": 0.5,
+    "base_score": np.mean(y_train),
+    "eval_metric": "logloss"
+}
+
+model_ind = xgboost.train(params, d_train, 5000, evals = [(d_test, "test")], verbose_eval=100, early_stopping_rounds=20)
+```
+
+```{python}
+shap_values_ind = shap.TreeExplainer(model_ind).shap_values(X)
+```
+
+Observe que as barras de cores de interação abaixo são insignificantes para esse modelo porque não tem interações.
+
+```{python}
+for name in X_train.columns:
+    shap.dependence_plot(name, shap_values_ind, X, display_features=X_display)
+```

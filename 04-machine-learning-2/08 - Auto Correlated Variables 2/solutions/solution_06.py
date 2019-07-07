@@ -1,0 +1,1 @@
+weekly_df = daily_df.resample('W').apply(sum)

@@ -1,0 +1,151 @@
+---
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.1'
+      jupytext_version: 1.1.6
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
+---
+
+# Pipelines para Automatizar Fluxos de Trabalho de Aprendizado de Máquina
+
+Há fluxos de trabalho padrão no aprendizado de máquina aplicado. Padrão porque eles superam problemas comuns, como vazamento de dados em seu equipamento de teste.
+
+Python scikit-learn fornece um utilitário Pipeline para ajudar a automatizar fluxos de trabalho de aprendizado de máquina.
+
+Os pipelines funcionam permitindo que uma sequência linear de transformações de dados seja encadeada, culminando em um processo de modelagem que pode ser avaliado.
+
+O objetivo é garantir que todas as etapas do pipeline sejam restritas aos dados disponíveis para a avaliação, como o conjunto de dados de treinamento ou cada dobra do procedimento de validação cruzada.
+
+Você pode aprender mais sobre Pipelines no scikit-learn lendo a seção Pipeline do guia do usuário . Você também pode revisar a documentação da API para as  classes Pipeline e  FeatureUnion no módulo de pipeline .
+
+
+# Pipeline 1: preparação e modelagem de dados
+Uma armadilha fácil de cair no aprendizado de máquina aplicado é o vazamento de dados do conjunto de dados de treinamento para o conjunto de dados de teste.
+
+Para evitar essa armadilha, você precisa de um equipamento de teste robusto com forte separação de treinamento e testes. Isso inclui preparação de dados.
+
+A preparação de dados é uma maneira fácil de vazar o conhecimento de todo o conjunto de dados de treinamento para o algoritmo. Por exemplo, preparar seus dados usando normalização ou padronização em todo o conjunto de dados de treinamento antes do aprendizado não seria um teste válido porque o conjunto de dados de treinamento teria sido influenciado pela escala dos dados no conjunto de testes.
+
+Os pipelines ajudam a evitar o vazamento de dados em seu equipamento de teste, garantindo que a preparação de dados, como a padronização, seja restrita a cada dobra do procedimento de validação cruzada.
+
+O exemplo abaixo demonstra esse importante fluxo de trabalho de preparação de dados e avaliação de modelos. O pipeline é definido com duas etapas:
+
+Padronize os dados.
+Aprenda um modelo de Análise Linear Discriminante.
+O pipeline é então avaliado usando validação cruzada de 10 vezes.
+
+```{python}
+# Create a pipeline that standardizes the data then creates a model
+from pandas import read_csv
+from sklearn.model_selection import KFold
+from sklearn.model_selection import cross_val_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+# load data
+
+
+url = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv"
+names = ['preg', 'plas', 'pres', 'skin', 'test', 'mass', 'pedi', 'age', 'class']
+dataframe = read_csv(url, names=names)
+array = dataframe.values
+
+
+X = array[:,0:8]
+Y = array[:,8]
+# create pipeline
+
+
+estimators = []
+estimators.append(('standardize', StandardScaler()))
+estimators.append(('lda', LinearDiscriminantAnalysis()))
+model = Pipeline(estimators)
+
+
+
+# evaluate pipeline
+seed = 7
+kfold = KFold(n_splits=10, random_state=seed)
+results = cross_val_score(model, X, Y, cv=kfold)
+print(results.mean())
+```
+
+# Pipeline 2: Extração e Modelagem de Recursos
+Extração de recurso é outro procedimento que é suscetível a vazamento de dados.
+
+Como a preparação de dados, os procedimentos de extração de recursos devem ser restritos aos dados em seu conjunto de dados de treinamento.
+
+O pipeline fornece uma ferramenta útil chamada FeatureUnion, que permite que os resultados de vários procedimentos de seleção e extração de recursos sejam combinados em um conjunto de dados maior no qual um modelo pode ser treinado. É importante ressaltar que toda a extração de recursos e a união de recursos ocorrem dentro de cada dobra do procedimento de validação cruzada.
+
+O exemplo abaixo demonstra o pipeline definido com quatro etapas:
+
+Extração de recursos com análise de componentes principais (3 recursos)
+Extração de recursos com seleção estatística (6 recursos)
+União de recursos
+Aprenda um modelo de regressão logística
+O pipeline é então avaliado usando validação cruzada de 10 vezes.
+
+```{python}
+# Create a pipeline that extracts features from the data then creates a model
+from pandas import read_csv
+from sklearn.model_selection import KFold
+from sklearn.model_selection import cross_val_score
+from sklearn.pipeline import Pipeline
+from sklearn.pipeline import FeatureUnion
+from sklearn.linear_model import LogisticRegression
+from sklearn.decomposition import PCA
+from sklearn.feature_selection import SelectKBest
+
+
+# load data
+url = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv"
+names = ['preg', 'plas', 'pres', 'skin', 'test', 'mass', 'pedi', 'age', 'class']
+dataframe = read_csv(url, names=names)
+array = dataframe.values
+
+
+X = array[:,0:8]
+Y = array[:,8]
+
+
+# create feature union
+features = []
+features.append(('pca', PCA(n_components=3)))
+features.append(('select_best', SelectKBest(k=6)))
+feature_union = FeatureUnion(features)
+
+
+# create pipeline
+estimators = []
+estimators.append(('feature_union', feature_union))
+estimators.append(('logistic', LogisticRegression()))
+model = Pipeline(estimators)
+
+
+# evaluate pipeline
+seed = 7
+kfold = KFold(n_splits=10, random_state=seed)
+results = cross_val_score(model, X, Y, cv=kfold)
+print(results.mean())
+```
+
+# Resumo
+Neste post você descobriu as dificuldades do vazamento de dados no aprendizado de máquina aplicado.
+
+Você descobriu os utilitários de pipeline no Python-learn de Python e como eles podem ser usados ​​para automatizar fluxos de trabalho de aprendizado de máquina aplicados padrão.
+
+Você aprendeu a usar o Pipelines em dois casos de uso importantes:
+
+Preparação e modelagem de dados restrita a cada dobra do procedimento de validação cruzada.
+Extração de recurso e união de recurso restrita a cada dobra do procedimento de validação cruzada.
+Você tem alguma dúvida sobre vazamento de dados, pipelines ou este post? Faça suas perguntas nos comentários e eu farei o meu melhor para responder.
+
+```{python}
+
+```

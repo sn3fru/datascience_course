@@ -1,0 +1,1 @@
+df['published'] = pd.to_datetime(df['published'])

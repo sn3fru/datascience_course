@@ -1,0 +1,116 @@
+---
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.1'
+      jupytext_version: 1.1.2
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
+---
+
+# Demonstração: Importância dos recursos em uma Árvore de decisão
+
+
+Começaremos com a leitura do conjunto de dados de aceitabilidade de automóveis.
+
+```{python}
+import pandas as pd
+df = pd.read_csv('cars.csv') # Revisar o path
+df.head()
+```
+
+Desta vez, vamos codificar os recursos usando um esquema de codificação One Hot, isto é, vamos considerá-los como variáveis categóricas.
+
+Como Scikit-Learn não entende strings, apenas números, também precisaremos atribuir números às tags. Para isso, usaremos o ‘LabelEncoder’.
+
+```{python}
+from sklearn.preprocessing import LabelEncoder
+le = LabelEncoder()
+y = le.fit_transform(df['acceptability'])
+X = pd.get_dummies(df.drop('acceptability', axis=1))
+X.iloc[:,0:8].head()
+```
+
+Vamos treinar uma árvore de decisão em todo o conjunto de dados (neste momento, vamos ignorar o superajuste). Também vamos limitar a árvore artificialmente para que seja pequena e possamos visualizá-la.
+
+```{python}
+from sklearn.tree import DecisionTreeClassifier
+dt = DecisionTreeClassifier(max_depth = 3, min_samples_split = 2, random_state = 11)
+dt.fit(X, y)
+```
+
+Agora visualizemos a árvore usando o exportador de graphviz. Completar o que está faltando
+
+```{python}
+from IPython.display import Image
+from sklearn.tree import export_graphviz
+import pydotplus
+
+dot_data = export_graphviz(dt, out_file=None,  
+feature_names=X.columns,class_names=le.classes_,filled=True, rounded=True,proportion=True,special_characters=True)
+graph = pydotplus.graph_from_dot_data(dot_data)
+Image(graph.create_png())
+```
+
+Vamos traçar o índice de Gini para várias proporções em uma classificação binária:
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+# %matplotlib inline
+
+C0 = np.linspace(0,1)
+C1 = 1.0 - C0
+
+gini = 1 - ( C0**2 + C1**2 )
+
+plt.plot(C0, gini)
+plt.title('Índice de Gini para uma classificação binária')
+plt.xlabel('Fração de amostras da classe 0')
+plt.ylabel('Índice de Gini')
+```
+
+Aqui, vamos verificar o cálculo do índice de Gini no nó raiz da árvore acima:
+
+```{python}
+quantidade_ocorrências_classes = pd.Series(y).value_counts()
+total_observações = sum( quantidade_ocorrências_classes )
+
+proporções_classes = quantidade_ocorrências_classes / total_observações
+
+print ("Proporções Classes")
+print (proporções_classes)
+
+gini = 1 - sum( proporções_classes ** 2 )
+print ("Gini: ",gini)
+
+```
+
+Agora vamos ver a importância dos recursos da árvore gerada.
+Para o qual utilizaremos feature\_importances\_
+
+```{python}
+importância_features = pd.DataFrame(dt.feature_importances_,
+    index = X.columns,
+    columns=['importância']).sort_values('importância',
+        ascending=False)
+importância_features.head()
+```
+
+Agora vamos verificar o cálculo da importância.
+
+```{python}
+gini_persons_2 = 1.000 * 0.4573 - 0.667 * 0.5792 - 0.333 * 0.0000
+gini_safety_low = 0.666 * 0.5792 - 0.444 * 0.6288 - 0.222 * 0.0000
+gini_buying_vhigh = 0.444 * 0.6288 - 0.333 * 0.6286 - 0.111 * 0.4688
+
+norm = gini_persons_2 + gini_safety_low + gini_buying_vhigh
+
+print ("persons_2:", gini_persons_2 / norm)
+print ("safety_low:", gini_safety_low / norm)
+print ("buying_vhigh:", gini_buying_vhigh / norm)
+```
