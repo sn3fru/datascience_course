@@ -1,0 +1,31 @@
+name: dask-tutorial
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.6
+  - numpy
+  - h5py
+  - scipy
+  - toolz
+  - bokeh
+  - dask
+  - distributed
+  - notebook
+  - matplotlib
+  - Pillow
+  - pandas
+  - pandas-datareader
+  - pytables
+  - scikit-learn
+  - scikit-image
+  - snakeviz
+  - ujson
+  - graphviz
+  - pip
+  - s3fs
+  - fastparquet
+  - dask-ml
+  - pip:
+    - graphviz 
+    - cachey

@@ -1,0 +1,7 @@
+a = delayed(pd.read_csv)(filenames[0])
+b = delayed(pd.read_csv)(filenames[1])
+c = delayed(pd.read_csv)(filenames[2])
+na = delayed(len)(a)
+nb = delayed(len)(b)
+nc = delayed(len)(c)
+total = delayed(sum)([na, nb, nc])

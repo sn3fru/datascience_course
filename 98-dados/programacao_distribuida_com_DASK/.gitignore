@@ -1,0 +1,13 @@
+*.pyc
+*.dot
+*.pdf
+*.png
+.ipynb_checkpoints
+data/accounts.*.json.gz
+data/accounts.*.csv
+data/accounts.h5
+data/random.hdf5
+data/weather-big
+data/myfile.hdf5
+profile.html
+log
