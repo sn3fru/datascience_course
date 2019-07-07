@@ -1,0 +1,295 @@
+---
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.1'
+      jupytext_version: 1.1.2
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
+---
+
+<img src="imgs/dh_logo.png" align="right" width="50%">
+
+
+# Aula 3.5.2 - Clustering 
+
+Fala galera! Tudo bem? Hoje continuaremos a aula de clustering/unsupervised learning. Na aula passada, vimos os conceitos básicos de clustering, bem como o algoritmo mais simples para a tarefa (simples, porém muito eficiente em vários casos!). Hoje, veremos 2 novos algoritmos e como aplicá-los na vida real.
+
+```{python}
+# Dependencies
+
+import numpy as np
+import pandas as pd
+from sklearn.datasets.samples_generator import make_blobs
+from matplotlib import pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+# %matplotlib inline
+```
+
+## Dica de hoje: 
+
+Bom, como hoje a aula é de clustering, tentei achar alguns bons links de apoio para vocês!
+ - __[Esse link](https://towardsdatascience.com/the-5-clustering-algorithms-data-scientists-need-to-know-a36d136ef68)__ lista 5 dos principais tipos de algoritmos de clustering que um cientista de dados deve saber. É uma ótima leitura para saber com o que trabalhamos no nosso dia-a-dia :)
+ - __[K-Means vs Mean Shift](http://www.chioka.in/meanshift-algorithm-for-the-rest-of-us-python/)__
+ - __[Esse link](https://www.naftaliharris.com/blog/visualizing-dbscan-clustering/)__ é uma forma interativa de visualizar o DBSCAN funcionando! É sempre bom ver nossos algoritmos funcionando passo-a-passo quando estamos aprendendo sua lógica, recomendo fortemente!
+
+## Mean Shift sobre Dados Artificiais
+
+Vamos repetir o exercício de clusterização da aula anterior, mas com um algoritmo novo: mean shift! Uma das fraquezas que observamos no K-Means é que ele funciona de modo muito manual e repetitivo: temos que rodar um loop, extrair o cotovelo ou sihlouette scores para então achar o melhor K. Contornando essa questão, existem os algoritmos de clustering hierárquico: eles conseguem decidir sozinhos como agrupar dados em quantas seções. Vamos observar como aplicar o Mean-Shift em dados artificiais. Na célula abaixo, crie clusters com o `make_blobs` (o mesmo da aula passada), utilizando os clusters abaixo como `centers`, 800 samples e 3 features.
+
+```{python}
+clusters = [[1,1,1],[5,5,5],[3,10,10]]
+```
+
+```{python}
+# seu código aqui
+```
+
+```{python}
+# # %load solutions/solution_05.py
+X, _ = make_blobs(n_samples = 800, centers = clusters, n_features=3)
+```
+
+Abaixo, vamos aplicar o `MeanShift`. Sua classe se encontra no módulo *cluster* do sci-kit, e sua documentação está __[aqui](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.MeanShift.html)__. Também será necessário criar uma variável `cluster_centers` que recebe o atributo `cluster_centers_` do modelo.
+
+```{python}
+# seu código aqui
+```
+
+```{python}
+# # %load solutions/solution_06.py
+from sklearn.cluster import MeanShift
+
+ms = MeanShift()
+ms.fit(X)
+cluster_centers = ms.cluster_centers_
+```
+
+```{python}
+cluster_centers
+```
+
+Agora, temos vamos visualizar os resultados do Mean Shift:
+
+```{python}
+fig = plt.figure(figsize=(24,12))
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(X[:,0], X[:,1], X[:,2], marker='o')
+ax.scatter(cluster_centers[:,0], cluster_centers[:,1], cluster_centers[:,2], marker='x', color='red', s=300, linewidth=5, zorder=10)
+```
+
+Nas células abaixo, tente criar novos clusters com uma quantidade massiva de datapoints (>10k) e quantos centros você quiser. Tente aplicar K-Means e Mean-Shift. Quais diferenças você percebe, tanto de performance quanto de facilidade de implementação?
+
+```{python}
+# crie os novos blobs aqui
+clusters = [[1,1,20],[10,10,10],[20,10,1],[1,20,20],[20,20,20]]
+X, y = make_blobs(n_samples = 1000, centers = clusters, n_features=3)
+```
+
+```{python}
+# implemente K-Means
+# # %load solutions/solution_01.py
+from sklearn.cluster import KMeans
+
+# Initializing KMeans
+kmeans = KMeans(n_clusters=5)
+# Fitting with inputs
+kmeans = kmeans.fit(X)
+# Predicting the clusters
+labels = kmeans.predict(X)
+# Getting the cluster centers
+C = kmeans.cluster_centers_
+
+
+```
+
+```{python}
+fig = plt.figure()
+ax = Axes3D(fig)
+ax.scatter(X[:, 0], X[:, 1], X[:, 2], c=y)
+ax.scatter(C[:, 0], C[:, 1], C[:, 2], marker='*', c='#050505', s=1000)
+counter = 1
+for cluster in C:
+    print('Cluster ',counter)
+    print(cluster)
+    counter += 1
+```
+
+```{python}
+# implemente Mean Shift
+ms = MeanShift(bandwidth=5)
+ms.fit(X)
+cluster_centers = ms.cluster_centers_
+```
+
+```{python}
+cluster_centers
+```
+
+```{python}
+cluster_centers[:, 0]
+```
+
+```{python}
+# faça o plotting dos resultados
+fig = plt.figure(figsize=(24,12))
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(X[:,0], X[:,1], X[:,2], marker='o')
+ax.scatter(cluster_centers[:,0], 
+           cluster_centers[:,1], 
+           cluster_centers[:,2], 
+#            cluster_centers[:,3], 
+#            cluster_centers[:,4], 
+           marker='x', color='red', s=500, linewidth=5, zorder=10)
+```
+
+## DBSCAN - Clustering by Density
+
+Até agora vimos algoritmos de clustering com base em centroides. Embora úteis, eles podem cair em armadilhas comuns de acordo com a forma dos dados (por exemplo, deixar um outlier influenciar sua média e calcular centroides errados). Há uma outro tipo de algoritmos de clustering que se baseiam no conceito de densidade! Eles observam os arredores dos dados e tomam decisões a partir disso. A premissa deles é forte, pois é de se pensar que dados semelhantes estão próximos uns dos outros, independente de sua forma. <br>
+O mais famoso algoritmo de clustering por densidade é o DBSCAN (Density-Based Spatial Clustering of Applications with Noise). O DBSCAN possui 2 parâmetros:
+ - ɛ: o raio da vizinhança
+ - minPts: o número mínimo de datapoints de uma vizinhança para que ela seja considera um cluster. <br>
+ 
+Dessa forma, temos 3 tipos de dados a partir desse algoritmo:
+ - Core points: os pontos que estão diretamente influenciando na densidade de nossa vizinhança
+ - Border Points: os pontos que são alcançaveis por vizinhanças de vizinhanças
+ - Outliers: pontos fora de qualquer vizinhança
+ 
+Os passos do DBSCAN são os seguintes:
+ - Escolha um ponto que ainda não foi dito como outlier ou assimilado a um cluster. Calcule sua vizinhança e determine se é um Core Point. Se sim, inicie uma nova vizinhança a partir dele.
+ - Adicione todos os directly-reachable points desse novo cluster ao seu cluster.
+ - Repita esses 2 passos até todos os clusters serem encontrados
+ - Identifique os outliers
+ 
+Vamos ver o DBSCAN na prática! Lidaremos com o __[whosale customers data](https://archive.ics.uci.edu/ml/datasets/Wholesale+customers)__: um dataset de 440 consumidores com 8 atributos cada. Seria possível descobrir segmentos de consumidores a partir desses atributos? Nas células abaixo, importe o dataset *wholesale_customers_data.csv* que está na pasta *data*. Depois, chame os métodos exploratórios básicos. Caso queira fazer algum plot, sinta-se à vontade.
+
+```{python}
+# seu codigo aqui
+```
+
+```{python}
+df = pd.read_csv(r'Wholesale customers data.csv', sep=',')
+df.head()
+```
+
+```{python}
+import seaborn as sns
+
+sns.pairplot(df)
+```
+
+```{python}
+
+```
+
+Vamos dropar as variáveis categóricas pois não as usaremos agora
+
+```{python}
+df.head(1)
+```
+
+```{python}
+df.drop(["Channel", "Region"], axis = 1, inplace = True)
+```
+
+```{python}
+# Let's plot the data now
+x = df['Grocery']
+y = df['Milk']
+
+plt.scatter(x,y)
+plt.xlabel("Groceries")
+plt.ylabel("Milk")
+```
+
+Na célula abaixo, mude df para que ele receba somente as colunas desejadas. No caso, eu usei *Grocery* e *Milk*. Depois, faça um casting como matriz utilizando `as_matrix()`e então um casting de datatype de modo concatenado para float32 utilizando `astype()`.
+
+```{python}
+# # %load solutions/solution_08.py
+df = df[["Grocery", "Milk"]]
+df = df.as_matrix().astype("float32", copy = False)
+```
+
+Abaixo, precisaremos realizar o scaling de nossos dados utilizando o `Standard Scaler`. Faça o `fit_transform()` nos nossos dados!
+
+```{python}
+# # %load solutions/solution_09.py
+from sklearn.preprocessing import StandardScaler
+
+stscaler = StandardScaler().fit(df)
+df_t = stscaler.transform(df)
+```
+
+Finalmente, podemos utilizar o DBSCAN! Ele se encontra no módulo de cluster do scikit! Abaixo, vamos implementar o algoritmo de clustering com eps=.5 e min_samples=15
+
+```{python}
+# # %load solutions/solution_10.py
+
+from sklearn.cluster import DBSCAN
+
+dbsc = DBSCAN(eps = .5, min_samples = 15).fit(df)
+```
+
+```{python}
+labels = dbsc.labels_
+core_samples = np.zeros_like(labels, dtype = bool)
+core_samples[dbsc.core_sample_indices_] = True
+```
+
+```{python}
+# df0 = pd.read_csv("data/wholesale_customers_data.csv")
+
+import seaborn as sns
+
+filtro=list(core_samples)
+
+df["filtro"]=filtro
+
+sns.lmplot("Grocery","Milk",data=df,fit_reg=False,hue="filtro",size=10)
+```
+
+Desafio: tente realizar um pairplot e observar alguns padrões no nosso dataset. Podemos escolher mais features para segmentar melhor nossos consumidores. Como o dataset ficará n-dimensional (n>2), precisaremos rodar algo como um PCA ou antes para selecionar features, ou depois (um t-SNE também vale) para o plotting. Arregace as mangas aí que esse desafio é real-worlds DS! Use as aulas passadas para isso ;)
+
+
+Para o desafio:
+- PCA-3 e depois um DBSCAN
+
+Aplicações:
+- Segmentação de clientes
+- Motor de recomendação
+
+
+Para processo de entrevista, em qual parte do processo vão ser feitas as perguntas pelo entrevistador. Podemos encarar isso como um processo.
+
+[Cross Industry Standard Process for Data Mining](https://pt.wikipedia.org/wiki/Cross_Industry_Standard_Process_for_Data_Mining)
+
+<br>
+<img src="imgs/crisp.png" align="center" width=400>
+<br>
+
+CRISP-DM é a abreviação de Cross Industry Standard Process for Data Mining, que pode ser traduzido como Processo Padrão Inter-Indústrias para Mineração de Dados. É um modelo de processo de mineração de dados que descreve abordagens comumente usadas por especialistas em mineração de dados para atacar problemas. 
+
+Em Julho de 2006 o consórcio responsável pela criação do processo anunciou que iria iniciar os trabalhos na direção da segunda versão do CRISP-DM. Em Setembro de 2006, o CRISP-DM SIG reuniu-se para discutir possíveis melhorias a serem implementadas no CRISP-DM 2.0, e traçar o curso do projeto. 
+
+Fases
+
+- Entender o Negócio: foca em entender o objetivo do projeto a partir de uma perspectiva de negócios, definindo um plano preliminar para atingir os objetivos.
+
+- Entender os Dados: recolhimento de dados e inicio de atividades para familiarização com os dados, identificando problemas ou conjuntos interessantes.
+
+- Preparação dos Dados: construção do conjunto de dados final a partir dos dados iniciais. Normalmente ocorre várias vezes no processo.
+
+- Modelagem: várias técnicas de modelagem são aplicadas, e seus parâmetros calibrados para otimização. Assim, é comum retornar à Preparação dos Dados durante essa fase.
+
+- Avaliação: é construído um modelo que parece ter grande qualidade de uma perspectiva de análise de dados. No entanto, é necessário verificar se o modelo atinge os objetivos do negócio.
+
+- Implantação: o conhecimento adquirido pelo modelo é organizado e apresentado de uma maneira que o cliente possa utilizar. 
+
+```{python}
+
+```

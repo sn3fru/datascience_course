@@ -1,0 +1,1 @@
+X, _ = make_blobs(n_samples = 800, centers = clusters, n_features=3)
