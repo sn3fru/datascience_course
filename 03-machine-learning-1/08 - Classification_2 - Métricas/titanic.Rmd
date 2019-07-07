@@ -1,0 +1,443 @@
+---
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.1'
+      jupytext_version: 1.1.2
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
+---
+
+```{python}
+
+import ipywidgets as widgets
+from IPython.display import display, HTML
+
+javascript_functions = {False: "hide()", True: "show()"}
+button_descriptions  = {False: "Show code", True: "Hide code"}
+
+
+def toggle_code(state):
+
+    """
+    Toggles the JavaScript show()/hide() function on the div.input element.
+    """
+
+    output_string = "<script>$(\"div.input\").{}</script>"
+    output_args   = (javascript_functions[state],)
+    output        = output_string.format(*output_args)
+
+    display(HTML(output))
+
+
+def button_action(value):
+
+    """
+    Calls the toggle_code function and updates the button description.
+    """
+
+    state = value.new
+
+    toggle_code(state)
+
+    value.owner.description = button_descriptions[state]
+
+
+state = False
+toggle_code(state)
+
+button = widgets.ToggleButton(state, description = button_descriptions[state])
+button.observe(button_action, "value")
+
+display(button)
+```
+
+```{python}
+import pandas as pd
+import numpy as np
+from tqdm import tqdm_notebook as tqdm
+import warnings
+
+# %matplotlib inline
+
+tqdm().pandas()
+warnings.filterwarnings("ignore")
+
+```
+
+```{python}
+# running tdqm with a big list
+# my_list = list(range(100000000))
+# for x in tqdm(my_list):
+#     pass
+```
+
+```{python}
+# ls
+```
+
+```{python}
+df = pd.read_csv('train.csv')
+```
+
+```{python}
+df.describe()
+```
+
+```{python}
+df.info()
+```
+
+```{python}
+df.corr().round(2)
+```
+
+```{python}
+import seaborn as sns
+
+sns.pairplot(df.sample(100))
+```
+
+```{python}
+df['Survived'].value_counts(1)
+```
+
+```{python}
+from sklearn.linear_model import LogisticRegression
+```
+
+```{python}
+df['age2'] = df['Age'].fillna(df['Age'].mean())
+X_col_name = ['PassengerId', 'Pclass', 'age2', 'SibSp', 'Parch', 'Fare']
+```
+
+```{python}
+modelo = LogisticRegression()
+
+modelo.fit(df[X_col_name], df['Survived'])
+```
+
+```{python}
+# modelo sem split
+```
+
+```{python}
+X = df[X_col_name]
+y = df['Survived']
+```
+
+```{python}
+# métrica com dados de treino
+modelo.score(X, y)
+```
+
+```{python}
+from sklearn.model_selection import cross_val_score
+```
+
+```{python}
+cross_val_score(modelo, X, y, cv = 10, scoring='r2').mean()
+```
+
+```{python}
+import sklearn 
+sklearn.metrics.SCORERS.keys()
+```
+
+```{python}
+cross_val_score(modelo, X, y, cv = 10, scoring='accuracy').mean()
+```
+
+```{python}
+cross_val_score(modelo, X, y, cv = 10, scoring='roc_auc').mean()
+```
+
+```{python}
+modelo.coef_
+```
+
+```{python}
+list(X)
+```
+
+```{python}
+for x in list(df):
+    if x not in list(X) and x != 'Survived':
+        print(x)
+```
+
+```{python}
+def percorer_coluna_name_e_achar_mrs(linha):
+    texto_procurado = 'Mr.'
+    if texto_procurado in linha['Name']:
+        return texto_procurado
+    
+    
+df['Mr.'] = df.apply(percorer_coluna_name_e_achar_mrs, axis=1)    
+```
+
+```{python}
+X_col_name.append('Sex')
+
+X_col_name
+```
+
+```{python}
+X = pd.get_dummies(df[X_col_name], ) 
+```
+
+```{python}
+X.drop(['Sex_male'], axis=1, inplace=True) # or drop_first=False
+```
+
+```{python}
+cross_val_score(modelo, X, y, scoring='roc_auc', cv=10).mean()
+```
+
+```{python}
+modelo.fit(X, y)
+```
+
+```{python}
+modelo.coef_
+```
+
+```{python}
+for variavel_categorica in ['Ticket', 'Cabin', 'Embarked']:
+    print(variavel_categorica)
+    print(df[variavel_categorica].value_counts())
+```
+
+```{python}
+df['first_character_of_Cabin'] = df['Cabin'].str[0:1]
+
+df['first_character_of_Cabin'] = df['first_character_of_Cabin'].fillna('Z')
+```
+
+```{python}
+df['first_character_of_Cabin'].value_counts()
+```
+
+```{python}
+X_col_name.append('first_character_of_Cabin')
+X_col_name.append('Embarked')
+```
+
+```{python}
+df[X_col_name].info()
+```
+
+```{python}
+# substituindo pela média condional -> método de imputation
+a_completar = df[df['Embarked'].isnull()]
+
+treinamento_intermediario = df[~(df['Embarked'].isnull())]
+```
+
+```{python}
+list(df.describe())
+```
+
+```{python}
+X_intermediario = treinamento_intermediario[['PassengerId', 'Survived', 'Pclass', 'SibSp', 'Parch', 'Fare', 'age2']]
+
+y_intermediario = treinamento_intermediario['Embarked']
+```
+
+```{python}
+modelo.fit(X_intermediario, y_intermediario)
+```
+
+```{python}
+modelo.score(X_intermediario, y_intermediario)
+```
+
+```{python}
+yhat_inter=modelo.predict(a_completar[['PassengerId', 'Survived', 'Pclass', 'SibSp', 'Parch', 'Fare', 'age2']])
+```
+
+```{python}
+yhat_inter
+```
+
+```{python}
+df['Embarked'] = df['Embarked'].fillna('S') # output do modelo intermediario
+```
+
+# Rodando com todas as variaveis as variaveis criadas
+
+```{python}
+X = pd.get_dummies(df[X_col_name], drop_first=True)
+```
+
+```{python}
+cross_val_score(estimator=modelo, X=X, y=y, scoring='roc_auc', cv=10).mean()
+```
+
+```{python}
+import xgboost as xgb
+```
+
+```{python}
+megazord = xgb.XGBClassifier()
+```
+
+```{python}
+cross_val_score(megazord, X, y, scoring='roc_auc', cv=10).mean()
+```
+
+```{python}
+from imblearn.over_sampling import SMOTE
+```
+
+```{python}
+print("Before OverSampling, counts of label '1': {}".format(sum(y==1)))
+print("Before OverSampling, counts of label '0': {} \n".format(sum(y==0)))
+
+sm = SMOTE(random_state=2)
+
+X_train_res, y_train_res = sm.fit_sample(X, y)
+
+print('After OverSampling, the shape of train_X: {}'.format(X_train_res.shape))
+print('After OverSampling, the shape of train_y: {} \n'.format(y_train_res.shape))
+
+print("After OverSampling, counts of label '1': {}".format(sum(y_train_res==1)))
+print("After OverSampling, counts of label '0': {}".format(sum(y_train_res==0)))
+```
+
+```{python}
+549-342
+```
+
+```{python}
+megazord.fit(X_train_res,
+             y_train_res)
+
+megazord.score(X_train_res, y_train_res)
+```
+
+```{python}
+cross_val_score(megazord,
+                X_train_res,
+                y_train_res,
+                scoring='roc_auc',
+                cv=5).mean()
+```
+
+# Parametrizando o Megazord
+
+```{python}
+from sklearn.model_selection import GridSearchCV
+```
+
+```{python}
+megazord
+```
+
+```{python}
+param_grid = {'n_estimators':[300],
+              'reg_alpha': [0, 0.001, 0.01, 0.05],
+              'reg_lambda': [0, 0.001, 0.01, 0.05],
+              'max_depth': [4, 5]}
+```
+
+```{python}
+param_grid
+```
+
+```{python}
+model_gs = GridSearchCV(megazord, param_grid, scoring='roc_auc', cv=5, n_jobs=5)
+model_gs.fit(X, y)
+```
+
+```{python}
+model_gs.best_params_
+```
+
+```{python}
+megazord = xgb.XGBClassifier(max_depth=5,
+                             n_estimators= 300,
+                             reg_alpha= 0,
+                             reg_lambda= 0.01)
+```
+
+```{python}
+cross_val_score(megazord,
+                X,
+                y,
+                scoring='roc_auc',
+                cv=10).mean()
+```
+
+```{python}
+df_teste = pd.read_csv('test.csvt.csv')
+```
+
+```{python}
+list(X)
+```
+
+```{python}
+df_teste['first_character_of_Cabin'] = df_teste.Cabin.str[0:1]
+
+df_teste['first_character_of_Cabin'].fillna('Z', inplace=True)
+
+df_teste['age2'] = df_teste['Age'].fillna(X.age2.mean())
+```
+
+```{python}
+df_teste.Age.mean() # substituir pela média do teste pode(vai) causar viés.
+```
+
+```{python}
+df_teste.Embarked.isnull().sum()
+```
+
+```{python}
+df_teste['Fare'] = df_teste['Fare'].fillna(df['Fare'].mean())
+```
+
+```{python}
+df_teste_all_dummies = pd.get_dummies(df_teste)
+```
+
+```{python}
+df_teste_all_dummies[list(X)]
+```
+
+```{python}
+for x in list(X):
+    
+    if x not in list(df_teste_all_dummies):
+        
+        df_teste_all_dummies[x] = 0
+```
+
+```{python}
+megazord.fit(X, y)
+```
+
+```{python}
+x
+```
+
+```{python}
+df_teste_all_dummies.shape
+```
+
+```{python}
+modelo.fit(X, y)
+```
+
+```{python}
+megazord.fit(X, y)
+```
+
+```{python}
+yhat1 = modelo.predict_proba(df_teste_all_dummies[list(X)])
+yhat2 = megazord.predict_proba(df_teste_all_dummies[list(X)])
+```

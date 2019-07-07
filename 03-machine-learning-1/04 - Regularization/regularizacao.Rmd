@@ -1,0 +1,652 @@
+---
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.1'
+      jupytext_version: 1.1.3
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
+---
+
+<!-- #region -->
+# Regularização em Machine Learning
+
+<br>
+<img src="img\regularizacao.png" style="height:350px">
+<br>
+
+Um dos principais aspectos do treinamento do seu modelo de aprendizado de máquina é evitar o overfitting, pois neste caso o modelo terá uma baixa precisão. Isso acontece porque o seu modelo dificilmente irá conseguir capturar o ruído em seu conjunto de dados de treinamento. Por ruído, queremos dizer os pontos de dados que realmente não representam as propriedades reais de seus dados, mas de chance aleatória. Aprender esses pontos de dados torna o seu modelo mais flexível, sob o risco de overfitting.
+
+O conceito de balanceamento de viés e variância é útil para entender o fenômeno do overfitting e variação de balanceamento, para controlar erros do Machine Leanrning
+
+#### No mundo do Machine Learning, a precisão é tudo.
+
+Regularização é uma técnica que restringe/regulariza/reduz as estimativas dos coeficientes para zero. Em outras palavras, esta técnica desencoraja a aprendizagem de um modelo mais complexo ou flexível, de modo a evitar o risco de overfitting.
+
+Uma relação simples de regressão linear se parece com a fórmula abaixo, onde $y$ representa a relação aprendida e 𝜃 representa as estimativas de coeficiente para diferentes variáveis ou preditores (x).
+
+
+<br>
+<br>
+$$y = \theta_0 + \theta_1x_1 + \theta_2x_2 + \theta_3x_3 + ... + \theta_nx_n$$
+<br>
+<br>
+
+O procedimento de ajuste envolve uma função de perda, conhecida como soma residual de quadrados ou RSS, sendo que os coeficientes são escolhidos, de forma que minimizem essa função de perda.
+
+A regularização ajustará os coeficientes com base nos seus dados de treinamento. Se houver ruído nos dados de treinamento, os coeficientes estimados não serão generalizados nos dados futuros. É aqui que a regularização entra e encolhe ou regulariza essas estimativas aprendidas para zero.
+
+
+## Ridge Regression
+
+<br>
+<br>
+$$Ridge : \lambda \sum_{i=1}^{n} \theta_i^2$$
+<br>
+<br>
+
+A fórmula acima mostra o coeficiente de Ridge que modifica a regressão pela adição da quantidade de contração. Agora, os coeficientes são estimados minimizando essa função, e o λ é o parâmetro de sintonia que decide quanto queremos penalizar a flexibilidade do nosso modelo. O aumento na flexibilidade de um modelo é representado pelo aumento de seus coeficientes e, se quisermos minimizar a função acima, esses coeficientes precisam ser pequenos. É assim que a técnica de regressão de Ridge impede que os coeficientes subam demais. Além disso, observe que encolhemos a associação estimada de cada variável com a resposta, exceto o intercepto $\theta_0$. 
+
+Quando λ = 0, o termo de penalidade não tem efeito, e as estimativas produzidas por regressão de rebordo serão iguais a mínimos quadrados. No entanto, como λ → ∞, o impacto da penalidade de contração aumenta, e as estimativas coe ﬁ cientes da regressão da crista se aproximam de zero. Como pode ser visto, selecionar um bom valor de λ é crítico. A validação cruzada é útil para esse propósito. As estimativas dos coeficientes produzidas por este método são também conhecidas como norma L2.
+
+Os coeficientes que são produzidos pelo método dos mínimos quadrados padrão são escala equivariante, ou seja, se multiplicarmos cada entrada por c, então os coeficientes correspondentes são escalonados por um fator de 1 / c. Portanto, independentemente de como o preditor é escalado, a multiplicação de preditor e coeficiente permanece a mesma. No entanto, esse não é o caso da regressão de Ridge e, portanto, precisamos padronizar os preditores ou trazer os preditores para a mesma escala antes de executar a regressão de Ridge.
+
+## Lasso Regression
+
+<br>
+<br>
+$$Lasso : \lambda \sum_{i=1}^{n} |\theta_i| $$
+<br>
+<br>
+
+Lasso é outra variação de regularização, em que a função acima é minimizada. É claro que essa variação difere da regressão de Ridge apenas em penalizar os altos coeficientes. Ele usa | $\theta_i$ | (módulo) em vez de quadrados de $\theta_i$, como sua penalidade. Nas estatísticas, isso é conhecido como a norma L1.
+
+Vamos dar uma olhada nos métodos acima com uma perspectiva diferente: a regressão de Ridge pode ser pensada como resolvendo uma equação, onde a soma dos quadrados dos coeficientes é menor ou igual a s. E o Lassoo pode ser pensado como uma equação onde a soma do módulo de coeficientes é menor ou igual a s. Aqui, s é uma constante que existe para cada valor do fator de encolhimento λ. Essas equações também são chamadas de funções de restrição.
+
+Considere os seus dois parâmetros em um determinado problema. Então, de acordo com a formulação acima, a regressão da crista é expressa por $\theta_1^2 +  \theta_2^2 ≤ s$. Isto implica que os coeficientes de regressão da crista têm a menor RSS (função de perda) para todos os pontos que se encontram dentro da circunferência dada por $\theta_1^2 +  \theta_2^2 ≤ s$.
+
+Da mesma forma, para laços, a equação se torna $ |\theta_1| +  |\theta_2| ≤ s $. Isto implica que os coeficientes de laço possuem o menor RSS (função de perda) para todos os pontos que estão dentro do diamante dado por $ |\theta_1| +  |\theta_2| ≤ s $.
+
+Artigo original:
+
+## [Regularization in Machine Learning](https://towardsdatascience.com/regularization-in-machine-learning-76441ddcf99a)
+<!-- #endregion -->
+
+<!-- #region -->
+# Regularization - Case
+
+<br>
+<img src="img\house_pricing.png" style="height:550px">
+<br>
+
+Você ficou famoso após o bom trabalho com as notas do IMDB e aumentou o lucro da companhia utilizando aprendizado de maquina. Agora seu chefe expandiu os negócios e te chamou para ajuda-lo. Ele teve a seguinte ideia: se podemos otimizar um algoritmo para ganhar dinheiro com um cinema, podemos fazer isso para outros tipos de produtos! Vamos passar a comprar imóveis baratos em leilões em vende-los pelo preço justo, e você, o cientista de dados de equipe tem que responder a pergunta:
+- Quais imóveis estão desvalorizados e merecem receber uma proposta?
+
+
+Para isso disponibilizamos o arquivo com os diversas caracteristicas de vários imóveis:
+```house_pricing_train.csv```
+
+Nesse problema, utilize 3 regressoes diferentes para treinarmos o conceito de regularização.
+
+
+- MQO
+- Ridge
+- Lasso
+
+Depois utilize o arquivo : ```house_pricing_test.csv``` para escolher os 10 imóveis que devemos investir para obter o **maior lucro**.
+
+Dica: Utilize o passo a passo do hands-on do IMDB.
+<!-- #endregion -->
+
+```{python}
+import pandas as pd
+```
+
+```{python}
+df_raw = pd.read_csv("house_pricing_train.zip")
+```
+
+```{python}
+df = df_raw.copy(deep=True)
+```
+
+```{python}
+df.info()
+```
+
+```{python}
+df.describe().T['count']
+```
+
+```{python}
+df.head()
+```
+
+```{python}
+import seaborn as sns
+import matplotlib.pyplot as plt
+# %matplotlib inline
+```
+
+```{python}
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Lasso, Ridge
+```
+
+```{python}
+# matriz de correlação entre todas as variáveis numéricas.
+# esse algoritmo só funciona se não tiver campos nulos.
+corrmat = df.corr()
+f, ax = plt.subplots(figsize=(12, 9))
+sns.heatmap(corrmat, vmax=.8, square=True,annot=True)
+```
+
+```{python}
+# vamos rodar uma regressão com statsmodel para analisar o comportamento e peso das variáveis
+import statsmodels.formula.api as smf
+
+function1 = '''price ~ 
+ + num_bed
+ + num_bath
+ + size_house
+ + size_lot
+ + num_floors
+ + is_waterfront
+ + condition
+ + size_basement
+ + year_built
+ + renovation_date
+ + zip
+ + latitude
+ + longitude
+ + avg_size_neighbor_houses
+ + avg_size_neighbor_lot'''
+
+model1 = smf.ols(function1, df).fit()
+print(model1.summary())
+
+```
+
+```{python}
+# uma forma minimamente mais analitica de escolher quais variáveis vamos passar log é olhando
+# o terceiro (assimetria) e quarto (curtose) momentos estatisticos e comparar com os valores ideias
+# de uma distribuição normal (0 e 3 respectivamente).
+
+# Exemplo do calculo da assimetria:
+from scipy import stats
+
+numeric_feats = df.dtypes[df.dtypes != "object"].index
+
+skewed_feats = df[numeric_feats].apply(lambda x: stats.skew(x.dropna())).sort_values(ascending=False)
+print("\nAssimetria: \n")
+skewness = pd.DataFrame({'Skew' :skewed_feats})
+skewness.head(20)
+```
+
+```{python}
+plt.hist(df.size_lot,bins=100, range=(0,300000))
+```
+
+```{python}
+# vemos por exemplo que a variavel price (nosso target) é bastante assimétrica.
+fig, ax = plt.subplots()
+ax.scatter(x = df['size_lot'], y = df['price'])
+plt.ylabel('Price', fontsize=13)
+plt.xlabel('Size', fontsize=13)
+plt.show()
+```
+
+a densidade e a variância é muito maior na concentração dos pontos (muita variância em uma mesma faixa de dados), então seria uma boa saída fazer dois modelos. Na entrada faz um if e sepera a entrada para ir para o respectivo modelo.
+
+```{python}
+# Aqui comparamos a distribuição real com uma normal teórica com mesma média e desvio.
+sns.distplot(df['price'] , fit=stats.norm);
+
+(mu, sigma) = stats.norm.fit(df['price'])
+print( '\n mu = {:.2f} and sigma = {:.2f}\n'.format(mu, sigma))
+plt.legend(['Normal dist. ($\mu=$ {:.2f} and $\sigma=$ {:.2f} )'.format(mu, sigma)],
+            loc='best')
+plt.ylabel('Frequency')
+plt.title('Price distribution')
+
+fig = plt.figure()
+res = stats.probplot(df['price'], plot=plt)
+plt.show()
+```
+
+```{python}
+import numpy as np
+```
+
+```{python}
+# agora vamos passar uma simples transformação logaritmica e ver se a curva fica mais próxima
+# da normal
+
+fig, ax = plt.subplots()
+ax.scatter(x = np.log(df['size_lot']), y = np.log(df['price']))
+plt.ylabel('Price', fontsize=13)
+plt.xlabel('Size', fontsize=13)
+plt.show()
+
+
+sns.distplot(np.log(df['price']) , fit=stats.norm);
+
+(mu, sigma) = stats.norm.fit(np.log(df['price']))
+print( '\n mu = {:.2f} and sigma = {:.2f}\n'.format(mu, sigma))
+plt.legend(['Normal dist. ($\mu=$ {:.2f} and $\sigma=$ {:.2f} )'.format(mu, sigma)],
+            loc='best')
+plt.ylabel('Frequency')
+plt.title('Price distribution')
+
+fig = plt.figure()
+res = stats.probplot(np.log(df['price']), plot=plt)
+plt.show()
+```
+
+com range e dispersão muito grandes, fazemos um re-scaling com Logaritmo - perde a interpretabilidade
+
+```{python}
+import statsmodels.formula.api as smf
+
+function1 = ''' np.log(price) ~ 
+ + num_bed
+ + num_bath
+ + size_house
+ + size_lot
+ + num_floors
+ + is_waterfront
+ + condition
+ + size_basement
+ + year_built
+ + renovation_date
+ + zip
+ + latitude
+ + longitude
+ + avg_size_neighbor_houses
+ + avg_size_neighbor_lot'''
+
+
+model1 = smf.ols(function1, df).fit()
+print(model1.summary())
+
+
+```
+
+```{python}
+# Aqui alguns exemplos de feature engineering.
+
+# Não há um manual bem definido para essas operações, por isso conhecer bem como o algortimo
+# funciona ajuda-nos a escolher as melhores opções.
+
+# Por exemplo, juntar colunas que são muitas parecidas e que as duas tenham pouquissimos dados pode 
+# ajudar o algoritmo a "entender mais facilmente". Mas se juntarmos duas colunas diferentes podemos
+# atrapalha-lo e ainda pior, se juntarmos uma coluna muito particular achando que ela deveria ser "juntada"
+# com outra, podemos perder informacões bastante valiosas. Portanto a melhor estratégia é testar!
+
+g = sns.factorplot(x="num_bath", data=df, kind="count",
+                   palette="BuPu", size=6, aspect=1.5)
+g.set_xticklabels(step=2)
+
+df['c_num_bath'] = df.num_bath.replace({0:0, 0.50:0, 0.75:0,
+                                          1:1, 1.25:1, 1.50:1, 1.75:1,
+                                          2:2, 2.25:2, 2.50:2, 2.75:2,
+                                          3:3, 3.25:3, 3.50:3, 3.75:3,
+                                          4:4, 4.25:4, 4.50:4, 4.75:4,
+                                          5:5, 5.25:5, 5.50:5, 5.75:5,
+                                          6:5, 6.25:5, 6.50:5, 6.75:5,
+                                          7:5, 7.25:5, 7.50:5, 7.75:5,
+                                          8:5})
+
+g = sns.factorplot(x="c_num_bath", data=df, kind="count",
+                   palette="BuPu", size=6, aspect=1.5)
+g.set_xticklabels(step=2)
+
+df['c_num_partial_bath'] = df.num_bath.replace({0:0, 0.25:1, 0.50:2, 0.75:3,
+                                                  1:0, 1.25:1, 1.50:2, 1.75:3,
+                                                  2:0, 2.25:1, 2.50:2, 2.75:3,
+                                                  3:0, 3.25:1, 3.50:2, 3.75:3,
+                                                  4:0, 4.25:1, 4.50:2, 4.75:3,
+                                                  5:0, 5.25:1, 5.50:2, 5.75:3,
+                                                  6:0, 6.25:1, 6.50:2, 6.75:3,
+                                                  7:0, 7.25:1, 7.50:2, 7.75:3,
+                                                  8:0})
+
+g = sns.factorplot(x="c_num_partial_bath", data=df, kind="count",
+                   palette="BuPu", size=6, aspect=1.5)
+g.set_xticklabels(step=2)
+```
+
+```{python}
+avg_zip = df.groupby(df['zip'])[['price', 'size_house', 'size_lot']].median()
+
+avg_zip.rename(columns={'price': 'zip_price',
+                        'size_house': 'zip_size_house',
+                        'size_lot':'zip_size_lot'}, inplace=True)
+
+avg_zip = avg_zip.reset_index()
+df = df.merge(avg_zip, left_on='zip', right_on='zip', how='inner')
+```
+
+```{python}
+var = ['year_built','renovation_date']
+for i in var:
+    data = pd.concat([df['price'], df[i]], axis=1)
+    f, ax = plt.subplots(figsize=(16, 8))
+    fig = sns.boxplot(x=i, y="price", data=data)
+    plt.xticks(rotation=90)
+```
+
+```{python}
+list(df)
+```
+
+```{python}
+# Criando uma simples função que cria variáveis dummies das colunas escolhidas.
+categoricals = ['condition', 'num_floors', 'is_waterfront', 'c_num_bath', 'c_num_partial_bath', 'zip']
+
+def one_hot(df, cols):
+    for each in cols:
+        dummies = pd.get_dummies(df[each], prefix=each, drop_first=True)
+        df = pd.concat([df, dummies], axis=1)
+    return df
+
+df = one_hot(df,categoricals)
+
+df = df.drop(categoricals, axis=1)
+```
+
+```{python}
+df.head()
+```
+
+```{python}
+# função para separar nossos dados em treino e teste
+from sklearn.model_selection import train_test_split
+def dfSplit(df, ratio, y='log_price'):
+    train, test = train_test_split(df, test_size = ratio)
+    y_train = train[y]
+    y_test = test[y]
+    x_train = train.ix[:, train.columns != y]
+    x_test = test.ix[:, test.columns != y]
+    return x_train, y_train, x_test, y_test
+```
+
+```{python}
+# função para expandir o polinomio das colunas explicativas (os X`s)
+# conforme conversamos em aula, isso serve para que a função possa entender
+# comportamos não lineares por outro lado, se tivermos interações e polinomios sem necessidade
+# podemos causar overfiting, ou seja, superajustar nosso modelo.
+def tPoly(df, degree=1):
+    polynomial = PolynomialFeatures(degree=degree)
+    return polynomial.fit_transform(df)
+```
+
+```{python}
+from sklearn.metrics import make_scorer, mean_squared_error, r2_score
+from sklearn import linear_model
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.model_selection import cross_val_score
+```
+
+```{python}
+# função que roda nossos modeelos de machine learning, aplica o polinomio, separa os dados em
+# treino e teste, exibe as métricas e plota os resultados.
+
+scorer = make_scorer(mean_squared_error, greater_is_better = False)
+def testRegs(df, clf, degree=1, ratio=.2, y='log_price', metrics=[]):
+
+    x_train, y_train, x_test, y_test = dfSplit(df,ratio,y='log_price')
+
+    poly_x_train = tPoly(x_train,degree)
+    poly_x_test = tPoly(x_test,degree)
+
+    clf.fit(poly_x_train,y_train)
+    
+    y_hat = clf.predict(poly_x_test)
+    
+    rmse = np.sqrt(-cross_val_score(clf, poly_x_train, y_train, scoring = scorer, cv = 10))
+    
+    print("RMSE:", rmse.mean())
+    
+    y_train_pred = clf.predict(poly_x_train)
+    y_test_pred = clf.predict(poly_x_test)
+
+    
+    print('R2 TESTE: %.2f, R2 TREINO: %.2f, Parameters: %i' % (r2_score(y_test, y_hat), 
+                                                     clf.score(poly_x_train,y_train), 
+                                                     clf.coef_.shape[0]))
+
+#     y_train_pred = y_train_pred.sample(100)
+#     y_test_pred = y_test_pred.sample(100)
+    
+    plt.scatter(y_train_pred, y_train_pred - y_train, c = "blue", marker = "s", label = "Training data")
+    plt.scatter(y_test_pred, y_test_pred - y_test, c = "lightgreen", marker = "s", label = "Validation data")
+    plt.xlabel("Predicted values")
+    plt.ylabel("Residuals")
+    plt.hlines(y = 0, xmin = 10.5, xmax = 13.5, color = "red")
+    plt.show()
+
+    plt.scatter(y_train_pred, y_train, c = "blue", marker = "s", label = "Training data")
+    plt.scatter(y_test_pred, y_test, c = "lightgreen", marker = "s", label = "Validation data")
+    plt.xlabel("Predicted values")
+    plt.ylabel("Real values")
+    plt.legend(loc = "upper left")
+    plt.plot([10.5, 13.5], [10.5, 13.5], c = "red")
+    plt.show()
+```
+
+```{python}
+df['log_price'] = np.log(df['price'])
+```
+
+```{python}
+del df['price']
+```
+
+```{python}
+np.exp(13)
+```
+
+```{python}
+ols_simple = linear_model.LinearRegression()
+
+testRegs(df, ols_simple, 1)
+```
+
+```{python}
+def print_metrics(y_train, yhat_train,y_test, yhat_test):
+    print('\n-----Dados de Treino-----')
+    print('MSE - treino', mean_squared_error(y_train, yhat_train))
+    print('R2 - treino', r2_score(y_train, yhat_train))
+
+    print('\n-----Dados de Teste-----')
+    print('MSE - test', mean_squared_error(y_test, yhat_test))
+    print('R2 - test', r2_score(y_test, yhat_test))
+```
+
+```{python}
+def run_model_with_poly(dataframe, poly_n, modelo, target='log_price'):
+        
+    poly = PolynomialFeatures(degree=poly_n)
+
+    X = df.drop([target], axis=1)
+    
+    newY = dataframe[target]
+    
+    df_temp = pd.DataFrame(poly.fit_transform(X))
+    print('\ndf_temp shape', df_temp.shape)
+        
+    X_train, X_test, y_train, y_test = train_test_split(df_temp,newY,test_size=0.2)
+
+    print('\ntrain shape', X_train.shape)
+    print('teste shape', X_test.shape)
+    
+    modelo.fit(X_train, y_train)
+
+    yhat = modelo.predict(X_train)
+    yhat_test = modelo.predict(X_test[list(X_train)])
+
+    print_metrics(y_train, yhat, y_test, yhat_test)
+    return modelo
+```
+
+```{python}
+# # %time run_model_with_poly(df, 2, ols_simple)
+```
+
+```{python}
+# %time run_model_with_poly(df, 1, ols_simple)
+```
+
+```{python}
+from sklearn.linear_model import Lasso, Ridge, ElasticNet
+```
+
+```{python}
+modelo_lasso = Lasso(alpha=.5)
+
+modelo_ridge = Ridge(alpha=.5)
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+X = df.drop(['log_price'], axis=1)
+y = df['log_price']
+
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=.3)
+
+LISTA_ALPHAS = []
+LISTA_R2 = []
+
+for alpha in [0, 0.1, 0.01, 0.001, 0.05]: 
+#     alpha = alpha/100
+    modelo = Lasso(alpha=alpha)
+    modelo.fit(X_train, y_train)
+    yhat = modelo.predict(X_test)
+    
+    LISTA_ALPHAS.append(alpha)
+    LISTA_R2.append(r2_score(y_test, yhat))
+    
+#     print(f'Alpha:{alpha}, R2:{r2_score(y_test, yhat)}')
+
+pd.DataFrame({'alpha':LISTA_ALPHAS, 'r2': LISTA_R2})
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+reg_lasso = Lasso(alpha=.65)
+```
+
+```{python}
+# %time run_model_with_poly(df, 2, reg_lasso)
+```
+
+```{python}
+ridge = linear_model.RidgeCV(alphas = [ 0.01, 0.1, 0.5, 0.75, 1])
+
+# %time run_model_with_poly(df, 2, ridge)
+```
+
+```{python}
+lasso = linear_model.LassoCV(alphas = [0.01, 0.06, 0.1, 0.3, 0.6, 1], max_iter = 1000, cv = 10)
+# %time run_model_with_poly(df, 2, lasso)
+```
+
+<!-- #region -->
+# Apêndice: dicas de estudo
+
+## Portal Action
+
+Um portal elaborado em conjunto pelas empresas Estatcamp e DigUp, compostas por profissionais capacitados, com mestrado e doutorado em estatística e computação. Conta atualmente com mais de 3 milhões de visualizações ao ano.
+
+[Portal Action](http://www.portalaction.com.br/)
+
+## CsDojo
+
+Learning computer science and coding, made easy.
+
+[csdojo](https://www.csdojo.io/)
+
+## Python
+
+<br>
+<img src="img\python.png" style="height:50px">
+<br>
+
+### Métodos
+
+#### [.info()](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.info.html)
+
+#### [.head()](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.head.html)
+
+#### [.describe()](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.describe.html)
+
+#### [numpy.histogram()](https://docs.scipy.org/doc/numpy/reference/generated/numpy.histogram.html)
+
+#### [scipy.stats.skew()](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.skew.html)
+
+
+### Funções
+
+#### [slicing](https://www.oreilly.com/learning/how-do-i-use-the-slice-notation-in-python)
+
+#### [.apply()](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.apply.html)
+
+#### [.groupby()](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html)
+
+#### [aggregation and grouping](https://jakevdp.github.io/PythonDataScienceHandbook/03.08-aggregation-and-grouping.html)
+
+#### [.merge()](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.merge.html)
+
+#### [.get_dummies()](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.get_dummies.html)
+
+#### [.read_csv()](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html)
+
+## Libraries
+
+#### [missingno](https://github.com/ResidentMario/missingno)
+
+## Dataviz Libraries
+
+#### [matplotlib](https://matplotlib.org/)
+
+#### [matplotlib.pyplot()](https://matplotlib.org/tutorials/introductory/pyplot.html)
+
+#### [seaborn](https://seaborn.pydata.org/)
+
+#### [seaborn.boxplot()](https://seaborn.pydata.org/generated/seaborn.boxplot.html)
+
+#### [seaborn.violinplot()](https://seaborn.pydata.org/generated/seaborn.violinplot.html)
+
+
+
+
+
+
+<!-- #endregion -->
+
+```{python}
+
+```

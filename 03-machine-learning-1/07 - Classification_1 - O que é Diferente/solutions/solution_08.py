@@ -1,0 +1,1 @@
+p=sns.pairplot(diabetes_data_copy, hue = 'Outcome')

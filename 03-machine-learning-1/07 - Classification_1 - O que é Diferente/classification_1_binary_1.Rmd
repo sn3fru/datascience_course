@@ -1,0 +1,331 @@
+---
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.1'
+      jupytext_version: 1.1.3
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
+---
+
+<img src="imgs/dh_logo.png" align="right" width="50%">
+
+
+# Aula 3.8.1 - Classification Basics - Metrics - Model Test Pipeline
+
+Fala galera! Na aula de hoje, entraremos num capítulo que trata de um dos problemas mais comuns para Machine Learning: classificação! Em problemas de classifcação, temos um dataset com elementos de diversas classes e temos que ser capazes de discerní-los. Podemos dividir esse problema em 3 tipos:
+ - **Classificação Binária**: atribuir um datapoint como pertencente a 1 de 2 classes.
+ - **Classificação Multiclasse**: atribuir um datapoint como pertencente a 1 de n classes, n > 2.
+ - **Classificação Multilabel**: atribuir um datapoint como pertence a n de m classes, m > n. <br>
+Nessas 2 primeiras aulas, nosso foco será em classificação binária. Porém, antes de atacarmos um problema em específico, vamos esclarecer um conceito importantíssimo para classificação:
+
+# Sobre matrizes de confusão e suas métricas
+
+Numa classificação binária, temos 4 possíveis *outputs*: True Positive, False Positive, False Negative e True Negative. Podemos visualizar esses outputs numa matriz de confusão como essa: 
+
+<img src="imgs/confusion_matrix.png" align="left" width="100%">
+
+<br>
+
+Como podemos observar acima, trabalhamos com 4 métricas sobre essa matriz de confusão. Elas são:
+ - **Accuracy**: de tudo o que você classificou, qual parte você acertou. É a primeira métrica que olhamos, mas algumas vezes ela pode não responder nossas perguntas de modo satisfatório e ocultar o que está acontecendo com os erros.
+ - **Precision**: fração dos dados categorizados positivamente que são, de fato, casos positivos. É útil para sabermos quão confiável é nossa previsão para positivo.
+ - **Recall / Sensivity**: fração de dados positivos categorizados de fato como positivos. Mostra como nosso modelo enxerga os dados positivos
+ - **Specificity**: fração de dados negativos categorizados de fato como negativos. Mostra como nosso modelo enxerga os dados negativos.
+
+<br>
+Para cada problema de classificação binária, é interessante utilizar uma ou mais dessas métricas. A ideia é que sempre tenhamos controle não só da nossa acurácia, mas como estamos acertando e errando com nosso modelo, de modo a entender como melhorá-lo e quais as consequências dele nas previsões. Além das 4 métricas acima, também utilizamos o F1 Score, que é um balanço entre Precision e Recall, calculado por F1 = 2*((precision * recall) / (precision + recall)). <br>
+Com essas métricas em mãos, nos levamos à uma questão mais primordial: como escolher uma métrica para meu problema? Embora não exista uma resposta pronta para essa pergunta, é sempre interessante observarmos acurácia, precision e recall, juntas, para termos um entendimento do que está acontecendo :) <br>
+Separei alguns links para vocês irem mais a fundo nesse assunto de interpretar e escolher métricas:
+
+ - __[Classification Accuracy is Not Enough: More Performance Measures You Can Use](https://machinelearningmastery.com/classification-accuracy-is-not-enough-more-performance-measures-you-can-use/)__
+ - __[Data Science Performance Metrics for Everyone](https://machinelearningmastery.com/classification-accuracy-is-not-enough-more-performance-measures-you-can-use/)__
+ - __[Measuring Model Goodness — Part 1](https://towardsdatascience.com/measuring-model-goodness-part-1-a24ed4d62f71)__
+ - __[The 3 Pillars of Binary Classification: Accuracy, Precision & Recall](https://medium.com/@yashwant140393/the-3-pillars-of-binary-classification-accuracy-precision-recall-d2da3d09f664)__
+
+# Let's save some lifes
+
+Na aula de hoje, vamos trabalhar com o Breast Cancer Dataset. Ao invés de fazer o download, vamos aproveitar o módulo datasets do scikit! Esse dataset contém 13 atributos e 2 possíveis outcomes: M (Malign) ou B (Benign). Nossa tarefa será, a partir dos features, conseguir prever o tipo de tumor de cada paciente. Vamos primeiro fazer o loading do dataset:
+
+```{python}
+# Dependencies
+import pandas as pd
+import numpy as np
+from matplotlib import pyplot as plt
+import seaborn as sns
+
+# %matplotlib inline
+# Import scikit-learn dataset library
+from sklearn import datasets
+
+# Load dataset
+cancer = datasets.load_breast_cancer()
+```
+
+```{python}
+cancer.feature_names
+```
+
+```{python}
+cancer.target_names
+```
+
+```{python}
+cancer.data.shape
+```
+
+```{python}
+pd.DataFrame(cancer.data, columns = cancer.feature_names).head()
+```
+
+Ok, agora precisamos realizar o `train_test_split` dos nossos dados, uma vez que voltamos a realizar aprendizado supervisionado. Vamos fazer um split 80-20. Recomendo utilizar as aulas anteriores para isso! Na célula abaixo, realize o train-test-split criando 4 variáveis: X_train, X_test, y_train, y_test. Para reproducibilidade, vamos no tradicional random_state de 42, já que é a resposta para tudo.
+
+```{python}
+# # %load solutions/solution_00.py
+
+# Import train_test_split function
+from sklearn.model_selection import train_test_split
+
+# Split dataset into training set and test set
+X_train, X_test, y_train, y_test = train_test_split(cancer.data, cancer.target, test_size=0.2, random_state=42) 
+```
+
+Com nosso dados de treino e test, estamos prontos para aplicar nossos métodos de classificação! Vamos implementar uma logística e observar os resultados segundo as métricas que discutimos mais acima:
+
+```{python}
+# # %load solutions/solution_01.py
+#Import Logictic Regression model
+from sklearn.linear_model import LogisticRegression
+
+#Create a logistic regression Classifier
+clf = LogisticRegression()
+
+#Train the model using the training sets
+clf.fit(X_train, y_train)
+
+#Predict the response for test dataset
+y_pred = clf.predict(X_test)
+```
+
+```{python}
+y_pred
+```
+
+```{python}
+pd.DataFrame(clf.predict_proba(X_test), columns=['zero', 'um'])['um'].plot.hist()
+```
+
+Legal, montamos nosso modelo de regressão logística. Vamos montar a matriz de confusão dados os outputs do modelo e nossos targets. Para tal, importe o módulo `metrics` do scikit e crie uma variável cnf_matrix que recebe metrics.confusion_matrix(). Essa __[classe](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.confusion_matrix.html)__ recebe 2 argumentos: y_test e y_pred. Por fim, faça o `print()` da matriz!
+
+```{python}
+# # %load solutions/solution_02.py
+
+from sklearn import metrics
+cnf_matrix = metrics.confusion_matrix(y_test, y_pred)
+cnf_matrix
+```
+
+Parece então que temos 39 TP, 4 FP, 1 FN e 70 TN. Vamos puxar as métricas accuracy, precision e recall chamando os respectivos métodos de `metrics`. Eles são `.accuracy_score()`, `.precision_score()` e `.recall_score()`. Todos eles recebem 2 argumentos: y_test e y_pred. Faça o print das 3 métricas: 
+
+```{python}
+# # %load solutions/solution_03.py
+print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+print("Precision:",metrics.precision_score(y_test, y_pred))
+print("Recall:",metrics.recall_score(y_test, y_pred))
+
+metrics.f1_score(y_test, y_pred)
+```
+
+```{python}
+from sklearn.model_selection import cross_val_score
+```
+
+```{python}
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+```
+
+```{python}
+results = cross_val_score(clf, cancer.data, cancer.target, cv = 10, scoring='recall' )
+```
+
+```{python}
+results.mean(), results.std()
+```
+
+```{python}
+import sklearn
+```
+
+```{python}
+sklearn.metrics.SCORERS.keys()
+```
+
+Olha só! Parece que fizemos um modelo muito bom para prever o perfil do câncer de mama dos datapoints observados! Nossas 3 métricas estão top-notch, todas acima de 90%. Essa é a maneira artesanal de fazer um classificador. Vamos para algo mais emocionante.
+
+## Let's save some lifes again
+
+Para esse exercício, usaremos o __[dataset](https://www.kaggle.com/uciml/pima-indians-diabetes-database)__ de diabetes da população indiana. Vamos explorar um pouco dele! Entre no link do Kaggle e faça o download do dataset na pasta data dessa aula.
+
+```{python}
+col_names = ['pregnant', 'glucose', 'bp', 'skin', 'insulin', 'bmi', 'pedigree', 'age', 'label']
+
+pima = pd.read_csv("diabetes.csv", header=0, names=col_names)
+
+pima.info()
+```
+
+```{python}
+pima.head()
+```
+
+Parece que temos 1 para casos positivos de diabetes e 0 para casos negativos. Num problema de classificação, é **muito importante que, sempre que possível, façamos o balanceamento de classes, senão o modelo aprenderá de modo enviesado**. Na célula abaixo, vamos realizar um `.groupby()` em label seguido de um `.count()` para checar se nosso dataset está balanceado.
+
+```{python}
+pima.groupby('label').glucose.count()
+```
+
+Ok, ele não está balanceado 50-50, mas pelo menos ele não está ordens de grandeza desbalanceado. Vamos seguir como ele está, observar os resultados e então decidir se vale a pena balancea-lo ou aplicar outras transformações. Abaixo, realize o train-test-split da mesma forma que o exercício anterior:
+
+```{python}
+#split dataset in features and target variable
+feature_cols = ['pregnant', 'insulin', 'bmi', 'age','glucose','bp','pedigree']
+X = pima[feature_cols] # Features
+y = pima.label # Target variable
+```
+
+```{python}
+# # %load solutions/solution_04.py
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+```
+
+Vamos aplicar a Regressão logística da mesma maneira. Ao final da construção das predictions, já chame as 3 métricas básicas de classificação binária!
+
+```{python}
+# # %load solutions/solution_05.py
+
+# Create a svm Classifier
+clf = LogisticRegression()
+
+# Train the model using the training sets
+clf.fit(X_train, y_train)
+
+# Predict the response for test dataset
+y_pred = clf.predict(X_test)
+
+# Print the 3 main binary classification metrics
+print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+print("Precision:",metrics.precision_score(y_test, y_pred))
+print("Recall:",metrics.recall_score(y_test, y_pred))
+```
+
+Ok, dessa vez nossos resultados não deram tão certo...será que a regressão logística está realizando seu trabalho? Podemos observar isso pelo plot da curva ROC:
+
+```{python}
+y_pred_proba = clf.predict_proba(X_test)[::,1]
+fpr, tpr, _ = metrics.roc_curve(y_test,  y_pred_proba)
+auc = metrics.roc_auc_score(y_test, y_pred_proba)
+plt.plot(fpr,tpr,label="data 1, auc="+str(auc))
+plt.legend(loc=4)
+```
+
+Uma coisa que podemos fazer é resolver esse problema na força bruta: puxar um monte de modelos, testar no nosso dataset e ver o que se sai melhor. Isso parece meio burro, mas realmente fazemos isso no nosso dia-a-dia: por que testar um modelo se podemos testar vários ao mesmo tempo?
+
+```{python}
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.naive_bayes import GaussianNB
+
+classifiers = [
+    KNeighborsClassifier(3),
+    GaussianNB(),
+    LogisticRegression(),
+    SVC(),
+    DecisionTreeClassifier(),
+    RandomForestClassifier(),
+    GradientBoostingClassifier()]
+
+
+for clf in classifiers:
+    clf.fit(X_train, y_train)
+    name = clf.__class__.__name__
+    
+    print("="*30)
+    print(name)
+    
+    print('****Results****')
+    y_pred = clf.predict(X_test)
+    print("Accuracy:", metrics.accuracy_score(y_test, y_pred))
+    print("Precision:", metrics.precision_score(y_test, y_pred))
+    print("Recall:", metrics.recall_score(y_test, y_pred))
+```
+
+É desse jeito que testamos vários modelos ao mesmo tempo, para então analisar seus outputs. Dados os resultados acima, qual classificador você escolheria? Existe mais de uma resposta certa para essa pergunta. Pessoalmente, eu pegaria o Naive-Bayes ou a Decision Tree. <br>
+Podemos observar também que os algoritmos apresentam performances semelhantes. Será que não vale a pena voltar ao dataset e tomar decisões sobre ele? Por exemplo, realizar um balanceamento e scaling devidos? Fica então o desafio para vocês melhorarem a performance não utilizando métodos mais complexos, mas usando o feijão com arroz que aprendemos até agora que é ter carinho e atenção com os dados:
+
+```{python}
+pima.head(1)
+```
+
+```{python}
+pima_0 = pima[pima.label==0]
+pima_1 = pima[pima.label==1]
+```
+
+```{python}
+len(pima_0)
+```
+
+```{python}
+pima_0 = pima_0.sample(n=268, replace=True)
+len(pima_0)
+```
+
+```{python}
+pima = pd.concat([pima_0, pima_1], ignore_index=True)
+```
+
+```{python}
+pima.groupby('label').pregnant.count()
+```
+
+```{python}
+#split dataset in features and target variable
+feature_cols = ['pregnant', 'insulin', 'bmi', 'age','glucose','bp','pedigree']
+X = pima[feature_cols] # Features
+y = pima.label # Target variable
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+classifiers = [
+    KNeighborsClassifier(3),
+    GaussianNB(),
+    LogisticRegression(),
+    SVC(),
+    DecisionTreeClassifier(),
+    RandomForestClassifier(),
+    GradientBoostingClassifier()]
+
+
+for clf in classifiers:
+    clf.fit(X_train, y_train)
+    name = clf.__class__.__name__
+    
+    print("="*30)
+    print(name)
+    
+    print('****Results****')
+    y_pred = clf.predict(X_test)
+    print("Accuracy:", metrics.accuracy_score(y_test, y_pred))
+    print("Precision:", metrics.precision_score(y_test, y_pred))
+    print("Recall:", metrics.recall_score(y_test, y_pred))
+```
+
+```{python}
+
+```

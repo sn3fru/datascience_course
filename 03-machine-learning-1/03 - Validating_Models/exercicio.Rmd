@@ -1,0 +1,865 @@
+---
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.1'
+      jupytext_version: 1.1.3
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
+---
+
+# Exercicios
+
+<br>
+<img src="img\imdb.png" >
+<br>
+
+Utilize o dataset train.csv para os exercicios.
+
+<!-- #region -->
+#### Estamos em 2015 e você trabalha em uma empresa que compra filmes para passar no cinema. Bons filmes custam caro, assim como filmes ruins barato, mas Bons filmes atraem mais público. Seu chefe sabe que você está aprendendo Machine Learning e te propõe a seguinte tarefa:  - Precisamos achar uma boa oportunidade que nos faça aumentar o lucro da empresa!
+
+Você conseguirá aumentar o lucro da empresa quando comprar um filme que é subvalorizado mas que as features dele indicam que será um bom filme.
+
+Se pudessemos descobrir quais filmes que as pessoas acham que seriam ruins mas na verdade são bons, poderiamos investir apenas nestes e ganhar a diferença já que foi mal precificado.
+
+
+Vamos partir dos seguintes pressupostos:
+- Um filme bom ou ruim do ponto de vista de quem está precificando será o tamanho do seu orçamento (budget).
+
+- Um filme Bom/Ruim do ponto de vista do público serão filmes com altas notas (imdb_score).
+
+Então vamos procurar os filmes que tenham uma boa relação entre budget e score.
+(é como se quisessemos comprar scores pois isso que o público quer ver mas os donos dos filmes vendem baseado no budget do filme).
+
+O primeiro passo é entendermos bem o problema e os dados disponíveis.
+
+Por exemplo, se vamos comprar um filme, algumas features não estarão disponiveis antes da compra (elas são criadas apenas após a compra) para predizer o rating como as vendas de ingresso, faturamento, etc.
+
+Depois separamos nos nossos dados quais serão nossas variáveis explicativas (Os X) e qual é nossa variável target (nosso Y).
+
+Caso algumas das nossas variáveis explicativas sejam categórias, precisamos transforma-las em numéricas para que o modelo consiga entende-la.
+
+Podemos utilizar uma função do pandas dessa forma:
+
+``` df = pd.get_dummies(df) ```
+
+O último passo antes de rodar um modelo é dividir nossos dados em duas partes, uma para treinar o modelo e outra para testa-lo, podemos fazer uma amostra aleatória ou usar a função do sklearn que nos ajuda com isso:
+
+```
+from sklearn.model_selection import train_test_split
+
+ X_train, X_test, y_train, y_test = train_test_split(df[X], df[y], test_size=0.33, random_state=42)
+```
+Para isso Treine um Modelo de Machine Learning supervisionado que aprenda a predizer as notas dos filmes.
+
+Utilize os 4 passos visto na primeira aula de machine learning:
+```from sklearn.linear_model import LinearRegression```
+
+Após treinar o modelo vamos ver como estão as [métricas](http://scikit-learn.org/stable/modules/classes.html#module-sklearn.metrics) de assertividade.
+
+Analisar o R2, RMSE, MSE. Qual é o melhor nesse caso?
+
+Exemplo do MSE
+```
+from sklearn.metrics import mean_squared_error
+
+mean_squared_error(y_true, y_pred)
+```
+
+Como poderiamos melhorar esse modelo? Será que existe algum método para colocar todas as variáveis ao quadrado, cubo, etc para que possamos capturar efeitos não lineares? Óbviamente existe e já foi implementado no sklearn, podemos usar a função:
+
+```
+from sklearn.preprocessing import PolynomialFeatures
+
+poly = PolynomialFeatures(degree=3)
+
+df = poly.fit_transform(df)
+```
+
+Aparentemente sempre que aumentamos o grau do polinomio nosso modelo fica melhor, porque não podemos botar um número alto como 10?
+
+Rode o algoritmo com um grau = 10 e compare as métricas de treino contra as métricas de teste. O que está acontecendo?
+
+Parece que estamos chegando perto de um modelo bom para nosso objetivo de identificar oportunidade nos filmes. Será que poderiamos utilizar outro método de regressão mais robusto? Vamos tentar utilizar um dos melhores métodos que utiliza arvores aleatórias (usado geralmente em classificação e as estudaremos mais profundamente no módulo 4) como modelo:
+
+Treine agora o mesmo modelo utilizando um modelo não-linear (não exige que as correlações sejam lineares) e compare as métricas.
+
+```from sklearn.ensemble import RandomForestRegressor```
+
+
+
+Agora estamos em 2016. Use seu modelo treinado com todos os filmes até 2015 para responder a pergunta do seu chefe com os filmes que apareceram em 2016: Quais são os filmes que são realmente oportunidades de ganhar dinheiro (altos ratings, baixo custo).
+<!-- #endregion -->
+
+# Passo 1 - Entender o problema
+
+
+O problema está descrito no tutorial acima. O que não está escrito é qual abordagem deveriamos ter para resolve-lo.
+
+Vamos pensar em uma possibilidade de solução aqui e escreveremos todo o restante do código pensando em como alcançar esse resultado.
+
+Não existe um só caminho para resolver esse problema, mas a solução que eu pensei em aplicar é a seguinte:
+
+    1) de um lado os donos dos filmes precificam seus produtos com base em quanto gastaram.
+
+    2) Seguindo o pressuposto do problema, o sucesso de bilheteria do filme depende apenas das notas que as pessoas vão dar a ele.
+
+Com isso chegamos a conclusão que o melhor filme para apostarmos são aqueles que a relação entre o preço (1-custo) e o (2-receita) é a mais vantajoso para nós.
+
+Uma forma de pensar é que temos que "comprar" scores então procuraremos os scores mais baratos que será dado por (1)/(2) -> custo do filme / beneficio do filme.
+
+Então precisamos treinar um modelo de machine learning que quando chegar um filme novo, prediga com o máximo de acurácia a nota média que as pessoas darão para ele ( o quociente na nossa equação) já que o númerador (o custo do filme) já saberemos.
+
+```{python}
+import pandas as pd
+import numpy as np
+```
+
+```{python}
+df_raw = pd.read_csv("imdb_train.zip")
+```
+
+```{python}
+# agora vamos fazer uma cópia do nosso dataframe.
+# Note que usamos a função deep=True pois só assim garantimos que o 
+# dado está duplicado e não é apenas um "atalho" para o dataset original
+df = df_raw.copy(deep=True)
+```
+
+<!-- #region -->
+# Passo 2 - Escolher as variáveis.
+
+
+Definido claramente o que vamos fazer, vamos olhar as variáveis disponiveis e ver o que faz ou não sentido incluir.
+
+Diferentemente de modelagem estatistica, em machine learning não estamos preocupados com as variáveis serem correlacionadas, então não há um bom motivo (por hora) para retirarmos variáveis do modelo, portanto, meu primeiro modelo de 'benchmark' terá o máximo de variáveis/features possível.
+
+Algumas são facilmente excluidas, pois mesmo que sejam boas preditoras como o tamanho da bilheteria, ela só estará disponível após o filme ser lançado. Parte bastante importante da definição de um modelo de machine learning é pensar nesses pontos, de quais variáveis estarão disponiveis em um modelo de produção e isso, muitas vezes, pode ser bastante complicado por conta do carater temporal das variáveis tornando-se um "leakage" ou seja, um vazamento de dados.
+
+
+Variáveis como gross sabemos que não estará disponivel antes do lançamento então não vamos usa-la para treinar nosso modelo.
+
+Outra variável que não faz sentido para um modelo de machine é aquela que identifica o filme como um id, index ou o nome do filme.
+<!-- #endregion -->
+
+```{python}
+list(df_raw)
+```
+
+```{python}
+columns_to_drop = ['Unnamed: 0', 'gross', 'movie_title', 'plot_keywords']
+```
+
+```{python}
+df = df_raw.drop(columns_to_drop, axis=1)
+```
+
+```{python}
+list(df)
+```
+
+# Passo 3 - Tratando as variáveis.
+
+<!-- #region -->
+**Essa é a etapa mais longa, mais importante e mais dificil de um problema de machine learning.** (falaremos mais sobre essas técnicas nas próximas aulas)
+
+Essa etapa podemos usar todos os tratamentos de variáveis que aprendemos na modelagem estatistica quando estavamos rodando regressões simples. Não vou repetir os tratamentos mas todos podem ser utilizados.
+
+
+#### Campos nulos.
+
+Quando rodamos um dff.describe() percebemos muitos campos nulos e há diversas formas de trata-los.
+
+Alternativas para tratar nulos.
+
+1) Deleter todos os nulos.
+
+```
+df = df.dropna()
+```
+
+2) Substituir os nans pelas médias (nas numéricas) ou modas (nas categóricas).
+
+df['numericas'] = df['numericas'].fillna(df.mean())
+
+
+3) rodar um "pré-ML" que prevê os valores faltantes.
+
+
+
+4) Usar um algoritmo robusto para campos nulos.
+
+ex:
+
+```
+import xgboost as xgb
+```
+<!-- #endregion -->
+
+Vamos usar uma abordagem mista. Nas variáveis numéricas vamos substituir pela média e nas variáveis categóricas vamos excluir as linhas com campos nulos para aprender as duas metodologias. 
+
+(conforme vimos em estatistica, excluir linhas que não são aleatórias enviesam nosso modelo e não deve ser feito a menos que você tenha certeza que aqueles nulos são por alguma falha aleatória o que é bastante raro. Não sendo aleatório devemos tratar com uma das outras metodologias, principalmente a número 4).
+
+```{python}
+df.dtypes
+```
+
+```{python}
+df_numeric = df.select_dtypes(include=[np.number]) # dataset apenas com colunas numéricas.
+numericas = list(df_numeric)
+```
+
+```{python}
+# Nessa função selecionamos todas as colunas númericas e substituimos seus 
+# valores pelas médias das colunas. A função fillna retorna todos os campos 
+# nulos e a função df.mean retorna as médias de cada coluna.
+df[numericas] = df[numericas].fillna(df.mean())
+```
+
+```{python}
+# já nas variáveis categóricas (que contém texto ao invés de números)
+# vamos substituir os campos nulos por uma nova string que representa que aquele campo é faltante.
+df = df.fillna('na') # substitui os dados faltantes por 'na'
+df = df.dropna() # se sobrar alguma linha (nao deveria), dropamos essas linhas.
+df.shape
+```
+
+```{python}
+df.shape
+```
+
+Nossa segunda etapa de tratamento das variáveis consiste em transformar as variáveis em funções lineares (se estivermos rodando modelos lineares) através da aplicação de log nas variáveis "explosivas" tornando-a linear. Não faremos essa etapa pois nosso objetivo é rodar um algoritmo não linear em seguida.
+
+
+A terceira etapa de preparação dos dados é criar variáveis dummies para nossas features categóricas.
+
+Basicamente os algoritmos de machine learning não conseguem interpretar textos como o genêro de um filme ou os atores que participaram então precisamos transformar essas colunas categóricas em colunas numéricas para que o algoritmo possa capturar seus efeitos e predizer nosso target.
+
+Substituir as categorias por números dessa forma: COluna genêro de filme com valores [Terror=1, Comédia=2, Ação=3] embora faça o algoritmo rodar, não funcionará bem como variável explicativa pois elas não representam uma sequencia numérica. A forma mais simples de fazermos isso virar uma variável explicativa é pegar cada uma das categorias possíveis e transformar em uma coluna forma única que recebe apenas dois valores, 0 e 1. 0 se o valor não estiver presente e 1 caso esteja presente. Dessa forma nossa  representação ficará da seguinte forma. 
+
+- Coluna 1 = genero_terror
+- Coluna 2 = genero_comédia
+- Coluna 3 = genero_ação
+
+Assumindo 1 ou 0 dependendo do filme.
+
+Uma observação sobre essa técnica é que não é necessário colocar todas as possibilidades, uma delas se torna redundante e ao modelar esse caso podemos excluir uma delas.
+
+Essa técninca chamamos de one_hot (sklearn) e no pandas temos a função get_dummies que faz o mesmo processo.
+
+```{python}
+# df = pd.get_dummies(df, drop_first=True)
+```
+
+```{python}
+df.shape
+```
+
+Aumentamos das 26 colunas originais para mais de 15mil colunas!
+
+<!-- #region -->
+# Passo 4 - Treinando o modelo de Machine Learning
+
+Essa é a etapa mais simples mas que exige mais experiência.
+
+1) qual algoritmos escolher?
+
+Sabemos que nosso problema se trata de prever uma variável continua (uma nota) e como temos diversas notas para treina-lo podemos usar uma abordagem supervisionado.
+
+(obs: poderiamos tentar transformar cada intervalo de notas em uma categoria, ex: [0,1] -> 1, [1,2] -> 2 .... [9,10] -> 10 e prever usando um algoritmo de classificação, mas como as notas fazem sentido como uma variável numérica, ou seja, a nota seguinte é a nota anterior + 1, um algoritmo de classificação dificilmente superaria um de regressão já que as probabilidades de cada classe prevista em uma classificação é independente, é como se uma nota não tivesse nenhuma relação com a outra e isso não é verdade no nosso caso).
+
+Então:
+
+    Supervisionado -> Regressão
+    
+    
+Mas há dezenas de algoritmos de regressão (ver todos os disponiveis no sklearn nesse link: http://scikit-learn.org/stable/supervised_learning.html )
+
+Alguns deles:
+- MQO (o mais simples que estudamos em estatistica e abrimos o código na aula2 de machine learning).
+- Ridge -> Método de Shrinkage. Conrola sobreajuste com L1
+
+    $L = ∑( Ŷi– Yi)^2 + λ∑ β^2$
+
+
+- lasso -> Também método de Shrinkage. controle sobreajuste com L2
+
+   $ L = ∑( Ŷi– Yi)^2 + λ∑ |β|$
+
+
+- elasticnet -> combinação de Lasso + Ridge
+- Regressão Bayesiana -> Retorna distribuições de probabilidade ao invés de simples valores.
+
+    Ex: https://towardsdatascience.com/introduction-to-bayesian-linear-regression-e66e60791ea7?gi=392eaf9ea3b 
+    
+- Arvores aleatórias -> insere não lineariedades
+- Redes neurais -> também insere não lineariedades.
+- Ensambles -> Combinação de diferentes modelos.
+- Etc
+
+
+Qual usar ?
+
+No nosso exemplo vamos usar o mais simples MQO para usar de comparativo e um extremamente poderoso que são as arvores aleatórias (que ainda não vimos seu funcionamento).
+
+Na prática, quando colocamos um modelo em produção, podemos rodar diferentes algoritmos (que tem suas próprias vantagens e desvantagens) e pegar uma combinação desses diferentes algoritmos como o resultado final. A essa combinação de modelos damos o nome de **ensamble**.
+
+Para rodar qualquer modelo de machine learning desses, vamos passar pelos mesmos passos:
+
+    1) Importar o modelo desejado.
+    2) Instanciar em uma variável com os parâmetros desejados (ainda não vimos os parâmetros).
+    3) Separar nossos dados em variáveis explicativas (X) e explicadas/target (Y)
+    4) Separar nossos dados em Treino e Teste
+    5) Treinar o Modelo com o .fit()
+    6) Analisar as métricas, se não estiver boas, voltamos aos passos anteriores de trabalhar com as variáveis.
+    7) Estando tudo ok, rodamos previsões
+<!-- #endregion -->
+
+**1) Importar modelos**
+
+```{python}
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
+```
+
+**2) Instanciar os modelos em variáveis**
+
+```{python}
+modelo_MQO = LinearRegression()
+modelo_RF = RandomForestRegressor()
+```
+
+**3) Separar os dados em X e Y**
+
+```{python}
+numericas
+```
+
+```{python}
+df_raw[numericas] = df_raw[numericas].fillna(df_raw[numericas].mean())
+```
+
+```{python}
+df.corr()['imdb_score']
+```
+
+```{python}
+X = df[numericas].drop(['imdb_score'], axis = 1)
+y = df['imdb_score']
+```
+
+```{python}
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import GradientBoostingRegressor
+```
+
+```{python}
+model_regressao_linear = LinearRegression()
+```
+
+```{python}
+model_regressao_linear.fit(X, y)
+```
+
+```{python}
+model_regressao_linear.score(X, y)
+```
+
+```{python}
+# novo_X = X.sample(100)
+```
+
+```{python}
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.25)
+```
+
+# MOstrando a estocasticidade do test
+
+```{python}
+from sklearn.model_selection import train_test_split
+```
+
+```{python}
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.05)
+
+model_regressao_linear.fit(X_train, y_train)
+model_regressao_linear.score(X_test, y_test)
+```
+
+```{python}
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.05)
+
+model_regressao_linear.fit(X_train, y_train)
+model_regressao_linear.score(X_test, y_test)
+```
+
+```{python}
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.05)
+
+model_regressao_linear.fit(X_train, y_train)
+model_regressao_linear.score(X_test, y_test)
+```
+
+```{python}
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.05)
+
+model_regressao_linear.fit(X_train, y_train)
+model_regressao_linear.score(X_test, y_test)
+```
+
+```{python}
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.05)
+
+model_regressao_linear.fit(X_train, y_train)
+model_regressao_linear.score(X_test, y_test)
+```
+
+```{python}
+X_train.shape
+```
+
+```{python}
+y_train.shape
+```
+
+```{python}
+model_regressao_linear.fit(X_train, y_train)
+```
+
+```{python}
+model_regressao_linear.score(X_train, y_train)
+```
+
+```{python}
+model_regressao_linear.score(X_test, y_test)
+```
+
+```{python}
+model_megazord = GradientBoostingRegressor(max_depth=6)
+```
+
+```{python}
+model_megazord.fit(X_train, y_train)
+
+model_megazord.score(X_train, y_train)
+```
+
+```{python}
+model_megazord.score(X_test, y_test)
+```
+
+```{python}
+for complexidade in range(1,9):
+    
+    model_megazord = GradientBoostingRegressor(max_depth=complexidade)
+    model_megazord.fit(X_train, y_train)
+
+    print(f'Complexidade: {complexidade}, Score de Treino: {round(model_megazord.score(X_train, y_train),4)}, Score de Teste: {round(model_megazord.score(X_test, y_test), 4)}')
+```
+
+```{python}
+import xgboost as xgb # 
+```
+
+```{python}
+model = xgb.XGBRegressor()
+```
+
+```{python}
+numericas.append('director_name')
+```
+
+```{python}
+numericas
+```
+
+```{python}
+df_with_dummies=pd.get_dummies(df[numericas], drop_first=True)
+
+df_with_dummies.head()
+```
+
+```{python}
+y = df_with_dummies['imdb_score']
+X = df_with_dummies.drop(['imdb_score'], axis=1)
+```
+
+```{python}
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+```
+
+```{python}
+
+```
+
+```{python}
+model.fit(X_train, y_train)
+
+print(model.score(X_train, y_train))
+print(model.score(X_test, y_test))
+```
+
+```{python}
+del numericas[-1]
+```
+
+```{python}
+numericas
+```
+
+```{python}
+df_with_dummies=pd.get_dummies(df[numericas])
+```
+
+```{python}
+df_with_dummies.shape[1] == df[numericas].shape[1]
+```
+
+```{python}
+y = df_with_dummies['imdb_score']
+X = df_with_dummies.drop(['imdb_score'], axis=1)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+
+model.fit(X_train, y_train)
+
+print(model.score(X_train, y_train))
+print(model.score(X_test, y_test))
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+from sklearn.model_selection import cross_val_score
+```
+
+```{python}
+cross_val_score(model, X, y, cv=10, )
+```
+
+```{python}
+np.array([0.48753444, 0.57315798, 0.53658225, 0.600453  , 0.46794305,
+       0.52922209, 0.4648742 , 0.47493767, 0.47678152, 0.07438226]).mean()
+```
+
+```{python}
+from sklearn.preprocessing import PolynomialFeatures
+
+poly = PolynomialFeatures(degree=2)
+
+X = poly.fit_transform(X.fillna(X.mean()))
+```
+
+```{python}
+X.shape
+```
+
+```{python}
+model.fit(X, y)
+```
+
+```{python}
+# model.score(X, y)
+```
+
+```{python}
+df['yhat'] = model.predict(X)
+```
+
+```{python}
+df['erro'] = df['yhat'] - df['imdb_score']
+```
+
+```{python}
+# %matplotlib inline
+```
+
+```{python}
+df['erro'].plot.hist(bins=50)
+```
+
+```{python}
+df['ratio'] = (df['budget']/1000000) / df['yhat']
+```
+
+```{python}
+list(df)
+```
+
+```{python}
+df['ye]
+```
+
+```{python}
+df[['yhat', 'imdb_score', 'erro', 'ratio', 'budget']].sort_values(by=['ratio']).head(10)
+```
+
+```{python}
+dados16 = pd.read_csv('imdb_test.zip')
+```
+
+```{python}
+'Action|Adventure|Thriller'.split('|')
+```
+
+```{python}
+X = dados16[numericas].drop(['imdb_score'], axis=1)
+```
+
+```{python}
+dados16['imdb_score_predicted'] = model.predict(X)
+```
+
+```{python}
+dados16['ratio'] = (dados16['budget']/1000000) / dados16['imdb_score_predicted']
+```
+
+```{python}
+dados16.sort_values(by = ['ratio'])[['movie_title', 'budget']]
+```
+
+**4) Separar os dados em Treino e Teste** 
+
+Esse ponto é crucial em machine learning e falaremos mais vezes sobre diferentes técnicas em "splitar" os dados.
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+**5) Treinar o Modelo para que o algoritmo descrubra os melhores betas (que produzem os menores erros)**
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+**6) Após treinar o modelo podemos analisar suas métricas e aqui é uma parte sensivel, vamos entender algumas métricas.**
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+<!-- #region -->
+Vamos entender primeiro as métricas e em seguida entender a diferença entre os números de treino e de teste.
+
+**O que é o MSE e o MAE**
+MSE: Erros médios quadraticos.
+MAE: Erros médios absolutos.
+
+Qual a diferença entre eles?
+
+Pensemos no caso de um dataset com muitos outlinears, qual das duas métricas será mais prejudica (ou seja, qual métrica é mais sensivel a dados muito fora do padrão?). Nosso métrica ao quadrado é mais sensivel pois pegamos a diferença entre o valor predito e o realizado e elevamos ao quadrado tornando a diferença ainda maior. Já o MAE não é tão sensivel aos valores extremos pois consideramos apenas a distância absoluta que da o mesmo peso a distâncias grandes e pequenas.
+Ex: Valor predito = 8, Valor Real = 5.
+MAE= 8-5 = 3
+MSE= (8-5)^2 = 9 -> Penaliza erros maiores.
+
+
+Já o R2 é a mesma intepretação que demos em modelagem estatistica (% da variação de Y explicada por todas as variáveis explicativas X). Só que agora nosso objetivo é aumentar ao máximo nosso R2.
+
+
+
+** Métricas de Treino e Métricas de Teste **
+
+O grande objetivo de um modelo de aprendizado de maquina (ML) é termos um modelo que é preditivo para novos dados, ou seja, precisamos de um modelo que seja bastante genérico, que depois de treinado pode pegar dados que não estavam na amostra e consiga prever seu target com uma boa precisão.
+
+Então ter boas métricas nos dados de treino não significam necessariamente que o modelo é um bom preditor. Para isso ele precisa ter boas métricas nos dados de teste! (aquela parte dos dados que separamos e não participaram do treino). Se nosso algoritmo é capaz de prever de maneira satisfatória nossos dados de teste (que são dados novos para ele já que não participaram do treino) esse é um bom modelo.
+
+Quando as métricas dos dados de treino estão muito superiores aos dados de teste (como no nosso exemplo) significa que estamos fazendo um superajuste/sobreajuste ou como gostamos de chamar o modelo está com overfiting. Significa basicamente que nosso modelo se tornou especialista em prever nossos dados de treino mas não necessariamente é um bom modelo para prever dados fora do treinamento. Há muitas formas de contornar isso que veremos nas próximas aulas, mas a mais importante que faremos aqui é tentar equilibrar a complexidade do modelo, basicamente colocamos mais variáveis do que seria necessario.
+
+É aqui que voltamos ao passo de escolher e tratar variaveis e rodamos tudo novamente.
+Vamos fazer todos os processos na próxima linha e colocar um modelo um pouco mais simples:
+
+
+<img src="img\overfit.png" style="height:250px">
+<!-- #endregion -->
+
+```{python}
+# Vamos remover algumas colunas que podem estar causando um superajuste/overfiting no nosso modelo
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+Parece bem melhor agora, tanto o R2 aumentou como ficou mais parecido entre treino e teste sugerindo que não estou dando overfiting no modelo.
+
+
+Podemos ainda criar modelos um pouco mais complexos inserindo formas quadraticas, cubicas, etc para tentar capturar algum efeito não linear nos dados.
+
+Idealmente plotariamos as variáveis e escolheriamos as que fazem mais sentido colocar variaveis quadraticas, etc. Mas na prática rodamos um algoritmo para passar um polinomio em todas as nossas variáveis como no código abaixo:
+
+Obs: Colocamos todos os passos da regressão em uma função para não termos que ficar repetindo mais códigos.
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+7) Após estarmos convictos que o modelo treinado tem uma boa relação entre o viés e variância (parametrizado pela complexidade do nosso modelo. Novamente, quanto mais complexo mais ele consegue capturar efeitos não previsto pelo modelo como comportamentos não lineares e interação das variáveis, mas tornando o modelo menos genérico, ou seja, diminuindo os scores dos dados de teste) vamos treinar o modelo final com os parâmetros que conseguiram os melhores resultados nos dados de teste.
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+# Passo 5 - Fazer Predições.
+
+```{python}
+# Depois que temos o melhor modelo treinado vamos pegar os dados do mundo real e fazer previsão.
+
+df2016_raw = pd.read_csv('../../99 Datasets/imdb_test.zip')
+df2016 = df2016_raw.copy(deep=True)
+df2016.head()
+
+# nesse nosso caso, temos o target nos dados "reais", geralmente não o teriamos, 
+# aqui poderemos saber a perfomance do nosso algoritmo
+```
+
+```{python}
+# Todos os tratamentos de dados que fizemos no dataset original precisamos refazer aqui:
+
+df2016 = df2016.drop(columns_to_drop, axis=1)
+
+df2016[list(df_numeric)] = df2016[list(df_numeric)].fillna(df2016.mean())
+
+df2016 = df2016.fillna('na')
+
+df2016 = pd.get_dummies(df2016)
+
+Y2016 = df2016['imdb_score']
+```
+
+```{python}
+len(list(X))
+```
+
+```{python}
+len(list(df2016))
+```
+
+```{python}
+for i, dummy in enumerate(list(X)):
+    if dummy not in list(df2016):
+        df2016[dummy] = 0
+
+print(f'dummies adicionadas:{i}')
+```
+
+```{python}
+X2016 = df2016[list(X)]
+```
+
+```{python}
+yhat = final_model.predict(X2016)
+```
+
+```{python}
+# Perfeito! Temos um array com os valores previstos
+yhat
+```
+
+```{python}
+# como podemos saber de qual filme se trata cada um dos score previstos?
+# o algoritmo não diz qual é o nome do filme, mas a ordem em que passamos os dados se mantém ..
+# então podemos adicionar uma coluna no nosso dataframe original com as predições!
+
+df2016_raw['score_previsto'] = yhat
+df2016_raw.head()
+```
+
+# Respondendo a pergunta do nosso Desafio:
+
+```{python}
+result = df2016_raw[['movie_title','budget','score_previsto']]
+result['ratio'] = (result['budget']/1000000)/(result['score_previsto'])
+```
+
+```{python}
+# "piores" 10 filmes nas regras desse desafio, são os filmes que os scores custam mais caro.
+result.sort_values(by=['ratio'], ascending=False).head(10)
+```
+
+```{python}
+# "melhores" 10 filmes nas regras desse desafio.
+result.sort_values(by=['ratio'], ascending=True).head(10)
+```
+
+# Próximo passo, colocar o modelo em produção ...
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```

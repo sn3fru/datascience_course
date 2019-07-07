@@ -1,0 +1,1 @@
+wine.groupby('type').alcohol.count()
