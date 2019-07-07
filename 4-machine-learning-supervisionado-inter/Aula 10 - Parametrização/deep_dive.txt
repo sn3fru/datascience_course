@@ -1,2 +1,0 @@
-texto de apoio para quem quiser se aprofundar no tema: 
-https://roamanalytics.com/2016/09/15/optimizing-the-hyperparameter-of-which-hyperparameter-optimizer-to-use/
