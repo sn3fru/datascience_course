@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="1920"
+   height="1080"
+   viewBox="0 0 507.99996 285.75002"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06"
+   sodipodi:docname="sql.svg"
+   inkscape:export-filename="/Users/aviram/src/DataScienceDH/02 Analise Exploratória Inter/01 SQL/img/select-query-anatomy.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.59583333"
+     inkscape:cx="960"
+     inkscape:cy="540"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     inkscape:window-width="1680"
+     inkscape:window-height="1005"
+     inkscape:window-x="0"
+     inkscape:window-y="969"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-11.248987)">
+    <g
+       id="g1165"
+       transform="translate(266.94634,-5.0648863)">
+      <g
+         id="g1043">
+        <rect
+           y="216.41447"
+           x="14.363095"
+           height="55.940475"
+           width="205.61905"
+           id="rect991"
+           style="opacity:1;fill:#92d5e7;fill-opacity:1;stroke-width:0.28652978" />
+        <rect
+           style="opacity:1;fill:#e7ca92;fill-opacity:1;stroke-width:0.28652978"
+           id="rect989"
+           width="205.61905"
+           height="55.940475"
+           x="14.363095"
+           y="160.474" />
+        <rect
+           y="105.28947"
+           x="14.363095"
+           height="55.184532"
+           width="205.61905"
+           id="rect987"
+           style="opacity:1;fill:#e7e792;fill-opacity:1;stroke-width:0.28652978" />
+        <rect
+           style="opacity:1;fill:#9ddcb9;fill-opacity:1;stroke-width:0.28652978"
+           id="rect985"
+           width="205.61905"
+           height="59.26667"
+           x="14.363095"
+           y="46.022797" />
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:19.75555611px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           x="190.35939"
+           y="138.99747"
+           id="text1011"><tspan
+             sodipodi:role="line"
+             id="tspan1009"
+             x="190.35939"
+             y="138.99747"
+             style="fill:#ff0000;fill-opacity:1;stroke-width:0.26458332">①</tspan></text>
+        <text
+           id="text1015"
+           y="81.771866"
+           x="190.35939"
+           style="font-style:normal;font-weight:normal;font-size:19.75555611px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           xml:space="preserve"><tspan
+             style="fill:#ff0000;fill-opacity:1;stroke-width:0.26458332"
+             y="81.771866"
+             x="190.35939"
+             id="tspan1013"
+             sodipodi:role="line">③</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:19.75555611px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           x="190.35939"
+           y="207.29968"
+           id="text1019"><tspan
+             sodipodi:role="line"
+             id="tspan1017"
+             x="190.35939"
+             y="207.29968"
+             style="fill:#ff0000;fill-opacity:1;stroke-width:0.26458332">②</tspan></text>
+        <text
+           id="text1031"
+           y="250.50044"
+           x="190.35939"
+           style="font-style:normal;font-weight:normal;font-size:19.75555611px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           xml:space="preserve"><tspan
+             style="fill:#ff0000;fill-opacity:1;stroke-width:0.26458332"
+             y="250.50044"
+             x="190.35939"
+             id="tspan1029"
+             sodipodi:role="line">④</tspan></text>
+      </g>
+      <text
+         id="text817"
+         y="60.62373"
+         x="22.905355"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Bold';stroke-width:0.26458332"
+           y="60.62373"
+           x="22.905355"
+           id="tspan815"
+           sodipodi:role="line">SELECT</tspan><tspan
+           id="tspan819"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332"
+           y="74.484993"
+           x="22.905355"
+           sodipodi:role="line">   tabela1.coluna1,</tspan><tspan
+           id="tspan821"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332"
+           y="88.34626"
+           x="22.905355"
+           sodipodi:role="line">   sum(tabela3.coluna6),</tspan><tspan
+           id="tspan823"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332"
+           y="102.20753"
+           x="22.905355"
+           sodipodi:role="line">   tabela2.coluna4</tspan><tspan
+           id="tspan825"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Bold';stroke-width:0.26458332"
+           y="116.05251"
+           x="22.905355"
+           sodipodi:role="line">FROM</tspan><tspan
+           id="tspan829"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332"
+           y="129.91377"
+           x="22.905355"
+           sodipodi:role="line">   tabela1,</tspan><tspan
+           id="tspan831"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332"
+           y="143.77504"
+           x="22.905355"
+           sodipodi:role="line">   tabela2,</tspan><tspan
+           id="tspan833"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332"
+           y="157.63631"
+           x="22.905355"
+           sodipodi:role="line">   tabela3</tspan><tspan
+           id="tspan835"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Bold';stroke-width:0.26458332"
+           y="171.48129"
+           x="22.905355"
+           sodipodi:role="line">WHERE</tspan><tspan
+           id="tspan837"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332"
+           y="185.34256"
+           x="22.905355"
+           sodipodi:role="line">   tabela1.coluna3 = tabela2.coluna5 AND</tspan><tspan
+           id="tspan839"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332"
+           y="199.20381"
+           x="22.905355"
+           sodipodi:role="line">   tabela2.coluna2 &gt; 5 AND</tspan><tspan
+           id="tspan843"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332"
+           y="213.06508"
+           x="22.905355"
+           sodipodi:role="line">   tabela3.coluna5 &lt; tabela2.colna3</tspan><tspan
+           id="tspan847"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Bold';stroke-width:0.26458332"
+           y="226.91006"
+           x="22.905355"
+           sodipodi:role="line">GROUP BY</tspan><tspan
+           id="tspan849"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332"
+           y="240.77133"
+           x="22.905355"
+           sodipodi:role="line">   tabela2.coluna4</tspan><tspan
+           id="tspan851"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Bold';stroke-width:0.26458332"
+           y="254.61632"
+           x="22.905355"
+           sodipodi:role="line">ORDER BY</tspan><tspan
+           id="tspan853"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332"
+           y="268.47757"
+           x="22.905355"
+           sodipodi:role="line">   tabela1.coluna1</tspan><tspan
+           id="tspan827"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332"
+           y="281.70676"
+           x="22.905355"
+           sodipodi:role="line" /></text>
+    </g>
+    <g
+       id="g1132"
+       transform="translate(-238.22018,-5.745249)">
+      <g
+         id="g1037">
+        <rect
+           style="opacity:1;fill:#92d5e7;fill-opacity:1;stroke-width:0.28652978"
+           id="rect999"
+           width="205.61905"
+           height="55.940475"
+           x="259.29169"
+           y="229.56805" />
+        <rect
+           y="174.08115"
+           x="259.29169"
+           height="55.4869"
+           width="205.61905"
+           id="rect997"
+           style="opacity:1;fill:#9ddcb9;fill-opacity:1;stroke-width:0.28652978" />
+        <rect
+           y="103.77757"
+           x="259.29169"
+           height="70.303574"
+           width="205.61905"
+           id="rect995"
+           style="opacity:1;fill:#e7ca92;fill-opacity:1;stroke-width:0.28652978" />
+        <rect
+           style="opacity:1;fill:#e7e792;fill-opacity:1;stroke-width:0.28652978"
+           id="rect993"
+           width="205.61905"
+           height="69.54763"
+           x="259.29169"
+           y="34.229942" />
+        <text
+           id="text1003"
+           y="75.119492"
+           x="438.62369"
+           style="font-style:normal;font-weight:normal;font-size:19.75555611px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           xml:space="preserve"><tspan
+             style="fill:#ff0000;fill-opacity:1;stroke-width:0.26458332"
+             y="75.119492"
+             x="438.62369"
+             id="tspan1001"
+             sodipodi:role="line">①</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:19.75555611px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           x="438.62369"
+           y="263.65402"
+           id="text1007"><tspan
+             sodipodi:role="line"
+             id="tspan1005"
+             x="438.62369"
+             y="263.65402"
+             style="fill:#ff0000;fill-opacity:1;stroke-width:0.26458332">④</tspan></text>
+        <text
+           id="text1023"
+           y="165.55843"
+           x="438.62369"
+           style="font-style:normal;font-weight:normal;font-size:19.75555611px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           xml:space="preserve"><tspan
+             style="fill:#ff0000;fill-opacity:1;stroke-width:0.26458332"
+             y="165.55843"
+             x="438.62369"
+             id="tspan1021"
+             sodipodi:role="line">②</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:19.75555611px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+           x="438.62369"
+           y="207.94032"
+           id="text1027"><tspan
+             sodipodi:role="line"
+             id="tspan1025"
+             x="438.62369"
+             y="207.94032"
+             style="fill:#ff0000;fill-opacity:1;stroke-width:0.26458332">③</tspan></text>
+      </g>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="269.11905"
+         y="46.778748"
+         id="text889"><tspan
+           sodipodi:role="line"
+           x="269.11905"
+           y="46.778748"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Bold';stroke-width:0.26458332"
+           id="tspan863">JUNTE E COMBINE TODAS AS</tspan><tspan
+           id="tspan935"
+           sodipodi:role="line"
+           x="269.11905"
+           y="60.62373"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Bold';stroke-width:0.26458332">LINHAS DAS TABELAS</tspan><tspan
+           sodipodi:role="line"
+           x="269.11905"
+           y="74.484993"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332"
+           id="tspan865">   tabela1,</tspan><tspan
+           sodipodi:role="line"
+           x="269.11905"
+           y="88.34626"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332"
+           id="tspan867">   tabela2,</tspan><tspan
+           sodipodi:role="line"
+           x="269.11905"
+           y="102.20753"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332"
+           id="tspan869">   tabela3</tspan><tspan
+           sodipodi:role="line"
+           x="269.11905"
+           y="116.05251"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Bold';stroke-width:0.26458332"
+           id="tspan871">PEGUE SÓ LINHAS QUE OBEDEÇAM</tspan><tspan
+           id="tspan937"
+           sodipodi:role="line"
+           x="269.11905"
+           y="129.89749"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Bold';stroke-width:0.26458332">AOS CRITÉRIOS</tspan><tspan
+           id="tspan927"
+           sodipodi:role="line"
+           x="269.11905"
+           y="143.75876"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332">   tabela1.coluna3 = tabela2.coluna5 AND</tspan><tspan
+           id="tspan929"
+           sodipodi:role="line"
+           x="269.11905"
+           y="157.62003"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332">   tabela2.coluna2 &gt; 5 AND</tspan><tspan
+           id="tspan931"
+           sodipodi:role="line"
+           x="269.11905"
+           y="171.48129"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332">   tabela3.coluna5 &lt; tabela2.colna3</tspan><tspan
+           id="tspan933"
+           sodipodi:role="line"
+           x="269.11905"
+           y="185.32628"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Bold';stroke-width:0.26458332">MOSTRE AS COLUNAS</tspan><tspan
+           id="tspan905"
+           sodipodi:role="line"
+           x="269.11905"
+           y="199.18753"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332">   tabela1.coluna1,</tspan><tspan
+           id="tspan907"
+           sodipodi:role="line"
+           x="269.11905"
+           y="213.0488"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332">   sum(tabela3.coluna6),</tspan><tspan
+           id="tspan909"
+           sodipodi:role="line"
+           x="269.11905"
+           y="226.91006"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332">   tabela2.coluna4</tspan><tspan
+           sodipodi:role="line"
+           x="269.11905"
+           y="240.75505"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Bold';stroke-width:0.26458332"
+           id="tspan879">AGRUPE POR</tspan><tspan
+           sodipodi:role="line"
+           x="269.11905"
+           y="254.61632"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332"
+           id="tspan881">   tabela2.coluna4</tspan><tspan
+           sodipodi:role="line"
+           x="269.11905"
+           y="268.4613"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Bold';stroke-width:0.26458332"
+           id="tspan883">ORDENE POR</tspan><tspan
+           sodipodi:role="line"
+           x="269.11905"
+           y="282.32257"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332"
+           id="tspan885">   tabela1.coluna1</tspan><tspan
+           sodipodi:role="line"
+           x="269.11905"
+           y="295.55173"
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Helvetica Neue';-inkscape-font-specification:'Helvetica Neue Light';stroke-width:0.26458332"
+           id="tspan887" /></text>
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:19.75555611px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="245.10132"
+       y="161.09824"
+       id="text1303"><tspan
+         sodipodi:role="line"
+         id="tspan1301"
+         x="245.10132"
+         y="161.09824"
+         style="stroke-width:0.26458332">➔</tspan></text>
+  </g>
+</svg>
