@@ -1,5 +1,19 @@
-# Viz 
+# Exemplos de Plotagem
 
+Há muitas formas de se representar visualmente as informações, e aqui o terreno não aceita respostas certas e erradas, mas ao longo do tempo, foi-se construindo as boas praticas de plotagem, que mesmo não sendo uma lei/regra ainda sim é como a maioria das pessoas estão acostumadas a ler graficos, portanto devemos começar com os exemplos.
+
+Uma enciclopédia bastante completa sobre plotagem com exemplos e histórias. [data-to-viz](https://www.data-to-viz.com)
+<img src='img/poster_big.png'>
+
+
+O guia de plotagem da Adobe:
+<img src='img/2017-06-24-09_26_24-visuals-reference-may2017-A3.pdf-Adobe-Acrobat-Reader-DC.png'>
+
+E o "visual vocabulary" do [Financial Times](https://github.com/ft-interactive/chart-doctor/tree/master/visual-vocabulary) 
+<img src='img/Visual-vocabulary.png'>
+
+
+# Pacotes de Plotagem 
 
 Como as diferentes bibliotecas de python se relacionam atualmente?
 
@@ -21,4 +35,3 @@ Uma vez que HTML5 permitia rica interatividade em navegadores, muitas biblioteca
 ### Javascript -> Json -> WebGL / D3
 
 Assim como o HTML5 fez para a plotagem de JavaScript 2D, o padrão WebGL tornou a interatividade 3D no navegador e no Jupyter viável, levando à plotagem 3D no navegador construída em tree.js ( pythreejs , ipyvolume ), vtk.js ( itk-jupyter-widgets ) ou regl ( Plotly ). Nenhuma dessas novas abordagens 3D baseadas na Web aborda a amplitude e a profundidade das bibliotecas SciVis 3D de desktop, mas elas permitem total integração com os notebooks Jupyter, fácil compartilhamento e uso remoto via web. Portanto, embora as ferramentas WebGL tenham alguns aplicativos em comum com as ferramentas SciVis, elas provavelmente estão mais ligadas às outras ferramentas InfoVis.
-
