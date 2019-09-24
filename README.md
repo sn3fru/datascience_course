@@ -15,7 +15,7 @@ Das muitas formas de se representar as combinações de skills, a usada nesse cu
 
 ## Uma ilustração da diferença de outras profissões correlatas:
 
-![diff_ds_de_bi](https://ibb.co/t2MFBz1)
+![diff_ds_de_bi](https://i.ibb.co/vdxR1hM/0.png)
 
 
 
