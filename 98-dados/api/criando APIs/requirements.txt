@@ -9,7 +9,7 @@ SQLAlchemy==1.2.1
 
 jsonschema==2.6.0
 
-numpy==1.14.2
+numpy==1.22.0
 
 pandas==0.22.0
 
