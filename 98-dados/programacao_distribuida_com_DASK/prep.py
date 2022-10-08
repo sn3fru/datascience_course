@@ -119,7 +119,7 @@ def create_weather(growth=32):
 
     if not filenames:
         ws_dir = os.path.join(data_dir, 'weather-small')
-        raise ValueError('Did not find any hdf5 files in {}'.format(ws_dir))
+        raise ValueError(f'Did not find any hdf5 files in {ws_dir}')
 
     if not os.path.exists(os.path.join(data_dir, 'weather-big')):
         os.mkdir(os.path.join(data_dir, 'weather-big'))
